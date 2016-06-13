@@ -57,16 +57,16 @@ Window::~Window()
 
 void Window::initializeGL()
 {
-    if (!nvpr.create())
-        qFatal("NVPR init failed");
-
     QOpenGLContext *ctx = QOpenGLContext::currentContext();
     qDebug() << ctx->format();
+
+    if (!nvpr.create())
+        qFatal("NVPR init failed");
 
     prog = new QOpenGLShaderProgram;
 
     prog->addShaderFromSourceCode(QOpenGLShader::Fragment,
-                                  "uniform vec4 color;\n"
+                                  "uniform lowp vec4 color;\n"
                                   "void main() {\n"
                                   "  gl_FragColor = color;\n"
                                   "}\n"
@@ -108,7 +108,9 @@ void Window::paintGL()
 
     nvpr.matrixLoadIdentity(GL_PROJECTION);
     nvpr.matrixLoadIdentity(GL_MODELVIEW);
-    nvpr.matrixOrtho(GL_MODELVIEW, 0, 500, 0, 400, -1, 1);
+    QMatrix4x4 m;
+    m.ortho(0, 500, 0, 400, -1, 1);
+    nvpr.matrixLoadf(GL_MODELVIEW, m.constData());
 
     nvpr.stencilFillPath(pathObj, GL_COUNT_UP_NV, 0x1F);
     f->glEnable(GL_STENCIL_TEST);

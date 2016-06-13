@@ -87,10 +87,14 @@ bool QNvPathRenderingPrivate::resolve()
         return false;
     }
 
+    // Do not check for DSA as the string may not be exposed on ES
+    // drivers, yet the functions we need are resolvable.
+#if 0
     if (!ctx->hasExtension(QByteArrayLiteral("GL_EXT_direct_state_access"))) {
         qWarning("QtNVPR: GL_EXT_direct_state_access not supported");
         return false;
     }
+#endif
 
     if (ctx->format().stencilBufferSize() < 8)
         qWarning("QtNVPR: Stencil buffer not present?");
@@ -161,17 +165,12 @@ bool QNvPathRenderingPrivate::resolve()
     q->getProgramResourcefv = PROC(PFNGLGETPROGRAMRESOURCEFVNVPROC, glGetProgramResourcefvNV);
 
     q->matrixLoadf = PROC(PFNGLMATRIXLOADFEXTPROC, glMatrixLoadfEXT);
-    q->matrixMultf = PROC(PFNGLMATRIXMULTFEXTPROC, glMatrixMultfEXT);
     q->matrixLoadIdentity = PROC(PFNGLMATRIXLOADIDENTITYEXTPROC, glMatrixLoadIdentityEXT);
-    q->matrixRotatef = PROC(PFNGLMATRIXROTATEFEXTPROC, glMatrixRotatefEXT);
-    q->matrixScalef = PROC(PFNGLMATRIXSCALEFEXTPROC, glMatrixScalefEXT);
-    q->matrixTranslatef = PROC(PFNGLMATRIXTRANSLATEFEXTPROC, glMatrixTranslatefEXT);
-    q->matrixFrustum = PROC(PFNGLMATRIXFRUSTUMEXTPROC, glMatrixFrustumEXT);
-    q->matrixOrtho = PROC(PFNGLMATRIXORTHOEXTPROC, glMatrixOrthoEXT);
-    q->matrixPop = PROC(PFNGLMATRIXPOPEXTPROC, glMatrixPopEXT);
-    q->matrixPush = PROC(PFNGLMATRIXPUSHEXTPROC, glMatrixPushEXT);
 
-    return q->genPaths != nullptr && q->matrixLoadf != nullptr && q->programPathFragmentInputGen != nullptr;
+    return q->genPaths != nullptr // base path rendering ext
+        && q->programPathFragmentInputGen != nullptr // updated path rendering ext
+        && q->matrixLoadf != nullptr // direct state access ext
+        && q->matrixLoadIdentity != nullptr;
 }
 
 QT_END_NAMESPACE
