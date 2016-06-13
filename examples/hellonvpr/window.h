@@ -41,6 +41,8 @@
 #include <QOpenGLWindow>
 #include <QNvPathRendering>
 
+QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
+
 class Window : public QOpenGLWindow
 {
 public:
@@ -53,4 +55,6 @@ public:
 
 private:
     QNvPathRendering nvpr;
+    QOpenGLShaderProgram *prog;
+    int progColorLoc;
 };

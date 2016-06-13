@@ -38,6 +38,7 @@
 #define QNVPR_H
 
 #include <qopengl.h>
+#include <QtGui/qsurfaceformat.h>
 #include "qtnvprglobal.h"
 
 #ifndef QT_NO_OPENGL
@@ -306,6 +307,9 @@ class QNVPR_EXPORT QNvPathRendering
 public:
     QNvPathRendering();
     ~QNvPathRendering();
+
+    static QSurfaceFormat format();
+
     bool create();
 
     PFNGLGENPATHSNVPROC genPaths = nullptr;

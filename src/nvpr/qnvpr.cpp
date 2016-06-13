@@ -53,6 +53,20 @@ QNvPathRendering::~QNvPathRendering()
     delete d;
 }
 
+QSurfaceFormat QNvPathRendering::format()
+{
+    QSurfaceFormat fmt;
+    fmt.setDepthBufferSize(24);
+    fmt.setStencilBufferSize(8);
+    if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL) {
+        fmt.setVersion(4, 3);
+        fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
+    } else if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGLES) {
+        fmt.setVersion(3, 1);
+    }
+    return fmt;
+}
+
 bool QNvPathRendering::create()
 {
     return d->resolve();

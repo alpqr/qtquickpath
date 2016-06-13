@@ -41,21 +41,19 @@
 #include "window.h"
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
+#include <QDebug>
 
 Window::Window()
+    : prog(nullptr)
 {
-    QSurfaceFormat fmt;
-    fmt.setDepthBufferSize(24);
-    fmt.setStencilBufferSize(8);
-    setFormat(fmt);
+    setFormat(QNvPathRendering::format());
 }
 
 Window::~Window()
 {
+    delete prog;
 }
-
-typedef void (APIENTRYP color3f_t) (GLfloat red, GLfloat green, GLfloat blue);
-color3f_t color3f;
 
 void Window::initializeGL()
 {
@@ -63,11 +61,21 @@ void Window::initializeGL()
         qFatal("NVPR init failed");
 
     QOpenGLContext *ctx = QOpenGLContext::currentContext();
-    // TODO switch over to shaders and glProgramPathFragmentInputGenNV in order to support NVPR with ES as well
-    color3f = reinterpret_cast<color3f_t>(ctx->getProcAddress("glColor3f"));
+    qDebug() << ctx->format();
+
+    prog = new QOpenGLShaderProgram;
+
+    prog->addShaderFromSourceCode(QOpenGLShader::Fragment,
+                                  "uniform vec4 color;\n"
+                                  "void main() {\n"
+                                  "  gl_FragColor = color;\n"
+                                  "}\n"
+                                  );
+    prog->link();
+    progColorLoc = prog->uniformLocation("color");
 }
 
-void Window::resizeGL(int w, int h)
+void Window::resizeGL(int, int)
 {
 }
 
@@ -82,6 +90,8 @@ void Window::paintGL()
     f->glClearColor(0,0,0,0);
     f->glStencilMask(~0);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    prog->bind();
 
     static const GLubyte pathCommands[10] =
       { GL_MOVE_TO_NV, GL_LINE_TO_NV, GL_LINE_TO_NV, GL_LINE_TO_NV,
@@ -104,11 +114,12 @@ void Window::paintGL()
     f->glEnable(GL_STENCIL_TEST);
     f->glStencilFunc(GL_NOTEQUAL, 0, 0x1F);
     f->glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
-    color3f(0,1,0); // green
+
+    prog->setUniformValue(progColorLoc, QColor(Qt::green));
     nvpr.coverFillPath(pathObj, GL_BOUNDING_BOX_NV);
 
     nvpr.stencilStrokePath(pathObj, 0x1, ~0);
 
-    color3f(1,1,0); // yellow
+    prog->setUniformValue(progColorLoc, QColor(Qt::yellow));
     nvpr.coverStrokePath(pathObj, GL_CONVEX_HULL_NV);
 }
