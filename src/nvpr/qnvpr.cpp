@@ -39,6 +39,7 @@
 #ifndef QT_NO_OPENGL
 
 #include <QOpenGLContext>
+#include <QOpenGLExtraFunctions>
 #include "qnvpr_p.h"
 
 QT_BEGIN_NAMESPACE
@@ -53,6 +54,10 @@ QNvPathRendering::~QNvPathRendering()
     delete d;
 }
 
+/*!
+   \return a recommended QSurfaceFormat suitable for GL_NV_path_rendering on top
+   of OpenGL 4.3 or OpenGL ES 3.1.
+ */
 QSurfaceFormat QNvPathRendering::format()
 {
     QSurfaceFormat fmt;
@@ -67,9 +72,64 @@ QSurfaceFormat QNvPathRendering::format()
     return fmt;
 }
 
+/*!
+    Initializes using the current OpenGL context.
+ */
 bool QNvPathRendering::create()
 {
     return d->resolve();
+}
+
+/*!
+    Creates a program pipeline consisting of a separable fragment shader program.
+
+    This is essential for using NVPR with OpenGL ES 3.1+ since normal,
+    GLES2-style programs would not a vertex shader as well.
+
+    \note \a fragmentShaderSource should be a \c{version 310 es} shader since
+    this works both on desktop and embedded NVIDIA drivers, thus avoiding the
+    need to fight GLSL and GLSL ES differences.
+
+    The pipeline object is stored into \a pipeline, the fragment shader program
+    into \a program.
+
+    Use QOpenGLExtraFunctions to set uniforms, bind the pipeline, etc.
+
+    \return \c false on failure in which case the error log is printed on the
+    debug output. \c true on success.
+ */
+bool QNvPathRendering::createFragmentOnlyPipeline(const char *fragmentShaderSource, GLuint *pipeline, GLuint *program)
+{
+    QOpenGLContext *ctx = QOpenGLContext::currentContext();
+    if (!ctx)
+        return false;
+
+    QOpenGLExtraFunctions *f = ctx->extraFunctions();
+    *program = f->glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &fragmentShaderSource);
+    GLint status = 0;
+    f->glGetProgramiv(*program, GL_LINK_STATUS, &status);
+    if (!status) {
+        char s[1000];
+        f->glGetProgramInfoLog(*program, sizeof(s), nullptr, s);
+        qWarning("Failed to create separable shader program: %s", s);
+        return false;
+    }
+
+    f->glGenProgramPipelines(1, pipeline);
+    f->glUseProgramStages(*pipeline, GL_FRAGMENT_SHADER_BIT, *program);
+    f->glActiveShaderProgram(*pipeline, *program);
+
+    f->glValidateProgramPipeline(*pipeline);
+    status = 0;
+    f->glGetProgramPipelineiv(*pipeline, GL_VALIDATE_STATUS, &status);
+    if (!status) {
+        char s[1000];
+        f->glGetProgramPipelineInfoLog(*pipeline, sizeof(s), nullptr, s);
+        qWarning("Program pipeline validation failed: %s", s);
+        return false;
+    }
+
+    return true;
 }
 
 #define PROC(type, name) reinterpret_cast<type>(ctx->getProcAddress(#name))

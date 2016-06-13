@@ -303,6 +303,8 @@ public:
 
     bool create();
 
+    bool createFragmentOnlyPipeline(const char *fragmentShaderSource, GLuint *pipeline, GLuint *program);
+
     PFNGLGENPATHSNVPROC genPaths = nullptr;
     PFNGLDELETEPATHSNVPROC deletePaths = nullptr;
     PFNGLISPATHNVPROC isPath = nullptr;

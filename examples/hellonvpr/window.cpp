@@ -39,20 +39,22 @@
 ****************************************************************************/
 
 #include "window.h"
+#include <QMatrix4x4>
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QOpenGLShaderProgram>
+#include <QOpenGLExtraFunctions>
 #include <QDebug>
 
 Window::Window()
-    : prog(nullptr)
 {
     setFormat(QNvPathRendering::format());
 }
 
 Window::~Window()
 {
-    delete prog;
+    makeCurrent();
+    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
+    if (pp)
+        f->glDeleteProgramPipelines(1, &pp);
 }
 
 void Window::initializeGL()
@@ -63,16 +65,21 @@ void Window::initializeGL()
     if (!nvpr.create())
         qFatal("NVPR init failed");
 
-    prog = new QOpenGLShaderProgram;
+    static const char *fragSrc =
+            "#version 310 es\n"
+            "precision highp float;\n"
+            "out vec4 fragColor;\n"
+            "uniform vec4 color;\n"
+            "void main() {\n"
+            "  fragColor = color;\n"
+            "}\n";
 
-    prog->addShaderFromSourceCode(QOpenGLShader::Fragment,
-                                  "uniform lowp vec4 color;\n"
-                                  "void main() {\n"
-                                  "  gl_FragColor = color;\n"
-                                  "}\n"
-                                  );
-    prog->link();
-    progColorLoc = prog->uniformLocation("color");
+    if (!nvpr.createFragmentOnlyPipeline(fragSrc, &pp, &fs))
+        qFatal("Failed to create shader program");
+
+    QOpenGLExtraFunctions *f = ctx->extraFunctions();
+    colorLoc = f->glGetProgramResourceLocation(fs, GL_UNIFORM, "color");
+    Q_ASSERT(colorLoc >= 0);
 }
 
 void Window::resizeGL(int, int)
@@ -83,7 +90,7 @@ GLuint pathObj = 42;
 
 void Window::paintGL()
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
     // from nvpr_basic.c in NVprSDK
     f->glClearStencil(0);
@@ -91,7 +98,7 @@ void Window::paintGL()
     f->glStencilMask(~0);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    prog->bind();
+    f->glBindProgramPipeline(pp);
 
     static const GLubyte pathCommands[10] =
       { GL_MOVE_TO_NV, GL_LINE_TO_NV, GL_LINE_TO_NV, GL_LINE_TO_NV,
@@ -117,11 +124,11 @@ void Window::paintGL()
     f->glStencilFunc(GL_NOTEQUAL, 0, 0x1F);
     f->glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
 
-    prog->setUniformValue(progColorLoc, QColor(Qt::green));
+    f->glProgramUniform4f(pp, colorLoc, 0, 1, 0, 1); // green
     nvpr.coverFillPath(pathObj, GL_BOUNDING_BOX_NV);
 
     nvpr.stencilStrokePath(pathObj, 0x1, ~0);
 
-    prog->setUniformValue(progColorLoc, QColor(Qt::yellow));
+    f->glProgramUniform4f(pp, colorLoc, 1, 1, 0, 1); // yellow
     nvpr.coverStrokePath(pathObj, GL_CONVEX_HULL_NV);
 }
