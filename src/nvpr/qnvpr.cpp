@@ -84,7 +84,7 @@ bool QNvPathRendering::create()
     Creates a program pipeline consisting of a separable fragment shader program.
 
     This is essential for using NVPR with OpenGL ES 3.1+ since normal,
-    GLES2-style programs would not a vertex shader as well.
+    GLES2-style programs would not work without a vertex shader.
 
     \note \a fragmentShaderSource should be a \c{version 310 es} shader since
     this works both on desktop and embedded NVIDIA drivers, thus avoiding the
