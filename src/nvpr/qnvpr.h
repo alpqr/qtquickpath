@@ -39,7 +39,7 @@
 
 #include <qopengl.h>
 #include <QtGui/qsurfaceformat.h>
-#include "qtnvprglobal.h"
+#include <QtNVPR/qtnvprglobal.h>
 
 #ifndef QT_NO_OPENGL
 
