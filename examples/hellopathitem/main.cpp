@@ -41,12 +41,16 @@
 #include <QGuiApplication>
 #include <QQuickView>
 #include <QQmlEngine>
+#include <QNvPathRendering>
 
 int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
 
     QQuickView v;
+
+    v.setFormat(QNvPathRendering::format());
+
     v.setResizeMode(QQuickView::SizeRootObjectToView);
     v.setSource(QUrl("qrc:/main.qml"));
     QObject::connect(v.engine(), &QQmlEngine::quit, qGuiApp, &QCoreApplication::quit);
