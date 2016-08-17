@@ -113,11 +113,11 @@ void Window::paintGL()
     nvpr.pathParameteri(pathObj, GL_PATH_JOIN_STYLE_NV, GL_ROUND_NV);
     nvpr.pathParameterf(pathObj, GL_PATH_STROKE_WIDTH_NV, 6.5);
 
-    nvpr.matrixLoadIdentity(GL_PROJECTION);
-    nvpr.matrixLoadIdentity(GL_MODELVIEW);
+    nvpr.matrixLoadIdentity(GL_PATH_PROJECTION_NV);
+    nvpr.matrixLoadIdentity(GL_PATH_MODELVIEW_NV);
     QMatrix4x4 m;
     m.ortho(0, 500, 0, 400, -1, 1);
-    nvpr.matrixLoadf(GL_MODELVIEW, m.constData());
+    nvpr.matrixLoadf(GL_PATH_MODELVIEW_NV, m.constData());
 
     nvpr.stencilFillPath(pathObj, GL_COUNT_UP_NV, 0x1F);
     f->glEnable(GL_STENCIL_TEST);
