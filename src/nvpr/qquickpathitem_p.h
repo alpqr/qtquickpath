@@ -34,58 +34,33 @@
 **
 ****************************************************************************/
 
-#include "qnvprrendernode_p.h"
-#include "qnvpr.h"
+#ifndef QQUICKPATHITEM_P_H
+#define QQUICKPATHITEM_P_H
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include <QtNVPR/qtnvprglobal.h>
 #include <QQuickItem>
 
-#ifndef QT_NO_OPENGL
+QT_BEGIN_NAMESPACE
 
-#include <QOpenGLFunctions>
-
-class QNvprRenderNodePrivate
+class QNVPR_EXPORT QQuickPathItem : public QQuickItem
 {
 public:
-    QQuickItem *item;
+    QQuickPathItem(QQuickItem *parent = nullptr);
+
+    QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
 };
 
-QNvprRenderNode::QNvprRenderNode(QQuickItem *item)
-    : d(new QNvprRenderNodePrivate)
-{
-    d->item = item;
-}
+QT_END_NAMESPACE
 
-QNvprRenderNode::~QNvprRenderNode()
-{
-    releaseResources();
-    delete d;
-}
-
-void QNvprRenderNode::releaseResources()
-{
-}
-
-void QNvprRenderNode::render(const RenderState *state)
-{
-}
-
-QSGRenderNode::StateFlags QNvprRenderNode::changedStates() const
-{
-    return BlendState | StencilState;
-}
-
-QSGRenderNode::RenderingFlags QNvprRenderNode::flags() const
-{
-    return BoundedRectRendering | DepthAwareRendering;
-}
-
-QRectF QNvprRenderNode::rect() const
-{
-    return QRect(0, 0, d->item->width(), d->item->height());
-}
-
-bool QNvprRenderNode::isSupported()
-{
-    return QNvPathRendering::isSupported();
-}
-
-#endif // QT_NO_OPENGL
+#endif

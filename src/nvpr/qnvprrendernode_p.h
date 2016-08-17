@@ -34,11 +34,21 @@
 **
 ****************************************************************************/
 
-#ifndef QNVPRRENDERNODE_H
-#define QNVPRRENDERNODE_H
+#ifndef QNVPRRENDERNODE_P_H
+#define QNVPRRENDERNODE_P_H
 
-#include <QtNVPR/qtnvprglobal.h>
-#include <qsgrendernode.h>
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include "qquickpathrendernode_p.h"
 
 #ifndef QT_NO_OPENGL
 
@@ -47,7 +57,7 @@ QT_BEGIN_NAMESPACE
 class QQuickItem;
 class QNvprRenderNodePrivate;
 
-class QNVPR_EXPORT QNvprRenderNode : public QSGRenderNode
+class QNVPR_EXPORT QNvprRenderNode : public QQuickPathRenderNode
 {
 public:
     QNvprRenderNode(QQuickItem *item);
@@ -58,6 +68,8 @@ public:
     StateFlags changedStates() const override;
     RenderingFlags flags() const override;
     QRectF rect() const override;
+
+    static bool isSupported();
 
 private:
     QNvprRenderNodePrivate *d;

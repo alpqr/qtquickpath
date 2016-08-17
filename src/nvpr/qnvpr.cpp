@@ -73,11 +73,39 @@ QSurfaceFormat QNvPathRendering::format()
 }
 
 /*!
+  \return true if GL_NV_path_rendering is supported with the current OpenGL
+  context.
+ */
+bool QNvPathRendering::isSupported()
+{
+    QOpenGLContext *ctx = QOpenGLContext::currentContext();
+    if (!ctx)
+        return false;
+
+    if (!ctx->hasExtension(QByteArrayLiteral("GL_NV_path_rendering")))
+        return false;
+
+    // Do not check for DSA as the string may not be exposed on ES
+    // drivers, yet the functions we need are resolvable.
+#if 0
+    if (!ctx->hasExtension(QByteArrayLiteral("GL_EXT_direct_state_access"))) {
+        qWarning("QtNVPR: GL_EXT_direct_state_access not supported");
+        return false;
+    }
+#endif
+
+    return true;
+}
+
+/*!
     Initializes using the current OpenGL context.
+
+    \return true when GL_NV_path_rendering is supported and initialization was
+    successful.
  */
 bool QNvPathRendering::create()
 {
-    return d->resolve();
+    return isSupported() && d->resolve();
 }
 
 /*!
@@ -147,27 +175,6 @@ bool QNvPathRendering::createFragmentOnlyPipeline(const char *fragmentShaderSour
 bool QNvPathRenderingPrivate::resolve()
 {
     QOpenGLContext *ctx = QOpenGLContext::currentContext();
-    if (!ctx) {
-        qWarning("QtNVPR: No OpenGL context");
-        return false;
-    }
-
-    if (!ctx->hasExtension(QByteArrayLiteral("GL_NV_path_rendering"))) {
-        qWarning("QtNVPR: GL_NV_path_rendering not supported");
-        return false;
-    }
-
-    // Do not check for DSA as the string may not be exposed on ES
-    // drivers, yet the functions we need are resolvable.
-#if 0
-    if (!ctx->hasExtension(QByteArrayLiteral("GL_EXT_direct_state_access"))) {
-        qWarning("QtNVPR: GL_EXT_direct_state_access not supported");
-        return false;
-    }
-#endif
-
-    if (ctx->format().stencilBufferSize() < 8)
-        qWarning("QtNVPR: Stencil buffer not present?");
 
     q->genPaths = PROC(PFNGLGENPATHSNVPROC, glGenPathsNV);
     q->deletePaths = PROC(PFNGLDELETEPATHSNVPROC, glDeletePathsNV);

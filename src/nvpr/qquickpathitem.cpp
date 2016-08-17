@@ -34,58 +34,39 @@
 **
 ****************************************************************************/
 
+#include "qquickpathitem_p.h"
 #include "qnvprrendernode_p.h"
-#include "qnvpr.h"
-#include <QQuickItem>
+#include <QSGRendererInterface>
 
+QQuickPathItem::QQuickPathItem(QQuickItem *parent)
+    : QQuickItem(parent)
+{
+    setFlag(ItemHasContents);
+}
+
+QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
+{
+    QQuickPathRenderNode *n = static_cast<QQuickPathRenderNode *>(node);
+
+    if (!n) {
+        QSGRendererInterface *ri = window()->rendererInterface();
+        if (!ri)
+            return nullptr;
+        switch (ri->graphicsApi()) {
+            case QSGRendererInterface::OpenGL:
 #ifndef QT_NO_OPENGL
+                if (QNvprRenderNode::isSupported()) {
+                    n = new QNvprRenderNode(this);
+                    break;
+                }
+#endif
+            case QSGRendererInterface::Direct3D12:
+            case QSGRendererInterface::Software:
+            default:
+                qWarning("No path backend for this graphics API yet");
+                break;
+        }
+    }
 
-#include <QOpenGLFunctions>
-
-class QNvprRenderNodePrivate
-{
-public:
-    QQuickItem *item;
-};
-
-QNvprRenderNode::QNvprRenderNode(QQuickItem *item)
-    : d(new QNvprRenderNodePrivate)
-{
-    d->item = item;
+    return n;
 }
-
-QNvprRenderNode::~QNvprRenderNode()
-{
-    releaseResources();
-    delete d;
-}
-
-void QNvprRenderNode::releaseResources()
-{
-}
-
-void QNvprRenderNode::render(const RenderState *state)
-{
-}
-
-QSGRenderNode::StateFlags QNvprRenderNode::changedStates() const
-{
-    return BlendState | StencilState;
-}
-
-QSGRenderNode::RenderingFlags QNvprRenderNode::flags() const
-{
-    return BoundedRectRendering | DepthAwareRendering;
-}
-
-QRectF QNvprRenderNode::rect() const
-{
-    return QRect(0, 0, d->item->width(), d->item->height());
-}
-
-bool QNvprRenderNode::isSupported()
-{
-    return QNvPathRendering::isSupported();
-}
-
-#endif // QT_NO_OPENGL

@@ -300,6 +300,7 @@ public:
     ~QNvPathRendering();
 
     static QSurfaceFormat format();
+    static bool isSupported();
 
     bool create();
 

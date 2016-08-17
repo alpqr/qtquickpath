@@ -34,58 +34,31 @@
 **
 ****************************************************************************/
 
-#include "qnvprrendernode_p.h"
-#include "qnvpr.h"
-#include <QQuickItem>
+#ifndef QQUICKPATHRENDERNODE_P_H
+#define QQUICKPATHRENDERNODE_P_H
 
-#ifndef QT_NO_OPENGL
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
 
-#include <QOpenGLFunctions>
+#include <QtNVPR/qtnvprglobal.h>
+#include <qsgrendernode.h>
 
-class QNvprRenderNodePrivate
+QT_BEGIN_NAMESPACE
+
+class QNVPR_EXPORT QQuickPathRenderNode : public QSGRenderNode
 {
 public:
-    QQuickItem *item;
+    // ###
 };
 
-QNvprRenderNode::QNvprRenderNode(QQuickItem *item)
-    : d(new QNvprRenderNodePrivate)
-{
-    d->item = item;
-}
+QT_END_NAMESPACE
 
-QNvprRenderNode::~QNvprRenderNode()
-{
-    releaseResources();
-    delete d;
-}
-
-void QNvprRenderNode::releaseResources()
-{
-}
-
-void QNvprRenderNode::render(const RenderState *state)
-{
-}
-
-QSGRenderNode::StateFlags QNvprRenderNode::changedStates() const
-{
-    return BlendState | StencilState;
-}
-
-QSGRenderNode::RenderingFlags QNvprRenderNode::flags() const
-{
-    return BoundedRectRendering | DepthAwareRendering;
-}
-
-QRectF QNvprRenderNode::rect() const
-{
-    return QRect(0, 0, d->item->width(), d->item->height());
-}
-
-bool QNvprRenderNode::isSupported()
-{
-    return QNvPathRendering::isSupported();
-}
-
-#endif // QT_NO_OPENGL
+#endif
