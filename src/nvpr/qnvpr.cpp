@@ -109,9 +109,14 @@ bool QNvPathRendering::createFragmentOnlyPipeline(const char *fragmentShaderSour
     GLint status = 0;
     f->glGetProgramiv(*program, GL_LINK_STATUS, &status);
     if (!status) {
-        char s[1000];
-        f->glGetProgramInfoLog(*program, sizeof(s), nullptr, s);
-        qWarning("Failed to create separable shader program: %s", s);
+        GLint len = 0;
+        f->glGetProgramiv(*program, GL_INFO_LOG_LENGTH, &len);
+        if (len) {
+            QByteArray s;
+            s.resize(len);
+            f->glGetProgramInfoLog(*program, s.count(), nullptr, s.data());
+            qWarning("Failed to create separable shader program:\n%s", s.constData());
+        }
         return false;
     }
 
@@ -123,9 +128,14 @@ bool QNvPathRendering::createFragmentOnlyPipeline(const char *fragmentShaderSour
     status = 0;
     f->glGetProgramPipelineiv(*pipeline, GL_VALIDATE_STATUS, &status);
     if (!status) {
-        char s[1000];
-        f->glGetProgramPipelineInfoLog(*pipeline, sizeof(s), nullptr, s);
-        qWarning("Program pipeline validation failed: %s", s);
+        GLint len = 0;
+        f->glGetProgramPipelineiv(*pipeline, GL_INFO_LOG_LENGTH, &len);
+        if (len) {
+            QByteArray s;
+            s.resize(len);
+            f->glGetProgramPipelineInfoLog(*pipeline, s.count(), nullptr, s.data());
+            qWarning("Program pipeline validation failed:\n%s", s.constData());
+        }
         return false;
     }
 
