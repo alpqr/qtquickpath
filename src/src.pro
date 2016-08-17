@@ -1,2 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS += nvpr
+CONFIG += ordered
+SUBDIRS += nvpr imports

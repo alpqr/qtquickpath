@@ -34,44 +34,33 @@
 **
 ****************************************************************************/
 
-#include "qquickpathitem_p.h"
-#include "qnvprrendernode_p.h"
-#include <QSGRendererInterface>
+#include <QtQml/qqmlextensionplugin.h>
+#include <QtQml/qqml.h>
+#include <QtNVPR/private/qquickpathitem_p.h>
 
-QQuickPathItem::QQuickPathItem(QQuickItem *parent)
-    : QQuickItem(parent)
+static void initResources()
 {
-    setFlag(ItemHasContents);
-
-    qDebug("new path item");
-}
-
-QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
-{
-    QQuickPathRenderNode *n = static_cast<QQuickPathRenderNode *>(node);
-
-    if (!n) {
-        QSGRendererInterface *ri = window()->rendererInterface();
-        if (!ri)
-            return nullptr;
-        switch (ri->graphicsApi()) {
-            case QSGRendererInterface::OpenGL:
-#ifndef QT_NO_OPENGL
-                qDebug("checking nvpr support");
-                if (QNvprRenderNode::isSupported()) {
-                    qDebug("nvpr supported");
-                    n = new QNvprRenderNode(this);
-                    break;
-                }
-                qDebug("nvpr not supported");
+#ifdef QT_STATIC
+    Q_INIT_RESOURCE(qmake_QtQuick_Path)
 #endif
-            case QSGRendererInterface::Direct3D12:
-            case QSGRendererInterface::Software:
-            default:
-                qWarning("No path backend for this graphics API yet");
-                break;
-        }
-    }
-
-    return n;
 }
+
+QT_BEGIN_NAMESPACE
+
+class QmlPathPlugin : public QQmlExtensionPlugin
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
+
+public:
+    QmlPathPlugin(QObject *parent = 0) : QQmlExtensionPlugin(parent) { initResources(); }
+    void registerTypes(const char *uri) override
+    {
+        Q_ASSERT(QLatin1String(uri) == QLatin1String("QtQuick.PathItem"));
+        qmlRegisterType<QQuickPathItem>(uri, 2, 0, "PathItem");
+    }
+};
+
+QT_END_NAMESPACE
+
+#include "plugin.moc"

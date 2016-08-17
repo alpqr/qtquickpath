@@ -1,0 +1,4 @@
+module QtQuick.PathItem
+plugin qmlpathplugin
+classname QmlPathPlugin
+typeinfo plugins.qmltypes

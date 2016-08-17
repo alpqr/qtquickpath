@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += hellonvpr
+SUBDIRS += hellonvpr hellopathitem

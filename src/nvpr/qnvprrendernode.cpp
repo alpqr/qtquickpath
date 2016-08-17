@@ -66,6 +66,10 @@ void QNvprRenderNode::releaseResources()
 
 void QNvprRenderNode::render(const RenderState *state)
 {
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    // ### just to see that the node is active
+    f->glClearColor(1, 0, 0, 1);
+    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 QSGRenderNode::StateFlags QNvprRenderNode::changedStates() const
