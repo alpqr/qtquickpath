@@ -9,6 +9,8 @@ programs on OpenGL ES as well.
 
 Verified on Windows (OpenGL 4.5) and the Drive CX platform (OpenGL ES 3.2).
 
-Tested with Qt 5.8 (dev branch), but should function with Qt 5.6 and up (we use
-QOpenGLExtraFunctions to get a proper, cross-platform & cross-API wrapper for
-the ES 3.1-level functions).
+Tested with Qt 5.8. The work-in-progress QSGRenderNode subclass
+(QNvprRenderNode) requires the 5.8 or dev branch of qtdeclarative and by
+extension, qtbase. The non-Quick classes should function with Qt 5.6 and up (we
+use QOpenGLExtraFunctions to get a proper, cross-platform & cross-API wrapper
+for the ES 3.1-level functions).
