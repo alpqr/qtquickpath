@@ -2,11 +2,11 @@ import QtQuick 2.0
 import QtQuick.PathItem 2.0
 
 Item {
-    // Rectangle {
-    //     color: "purple"
-    //     anchors.fill: parent
-    //     id: r
-    // }
+    Rectangle {
+        id: r
+        color: "purple"
+        anchors.fill: parent
+    }
 
     PathItem {
         width: parent.width / 2

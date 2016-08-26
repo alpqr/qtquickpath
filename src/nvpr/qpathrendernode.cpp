@@ -34,56 +34,41 @@
 **
 ****************************************************************************/
 
-#include "qquickpathitem_p.h"
-#include "qnvprrendernode_p.h"
 #include "qpathrendernode_p.h"
-#include <QSGRendererInterface>
+#include "qquickpathitem_p.h"
+#include <QOpenGLExtraFunctions>
 
-class QQuickPathItemPrivate
+QPathRenderNode::QPathRenderNode(QQuickPathItem *item)
+    : m_item(item)
 {
-public:
-};
-
-QQuickPathItem::QQuickPathItem(QQuickItem *parent)
-    : QQuickItem(parent),
-      d(new QQuickPathItemPrivate)
-{
-    setFlag(ItemHasContents);
 }
 
-QQuickPathItem::~QQuickPathItem()
+QPathRenderNode::~QPathRenderNode()
 {
-    delete d;
+    releaseResources();
 }
 
-QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
+void QPathRenderNode::releaseResources()
 {
-    QQuickAbstractPathRenderNode *n = static_cast<QQuickAbstractPathRenderNode *>(node);
+//    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
+}
 
-    if (!n) {
-        QSGRendererInterface *ri = window()->rendererInterface();
-        if (!ri)
-            return nullptr;
-        switch (ri->graphicsApi()) {
-#ifndef QT_NO_OPENGL
-            case QSGRendererInterface::OpenGL:
-                if (QNvprRenderNode::isSupported())
-                    n = new QNvprRenderNode(this);
-                else
-                    n = new QPathRenderNode(this);
-                break;
-#endif
+void QPathRenderNode::render(const RenderState *state)
+{
+    //QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
+}
 
-            case QSGRendererInterface::Direct3D12:
-                n = new QPathRenderNode(this);
-                break;
+QSGRenderNode::StateFlags QPathRenderNode::changedStates() const
+{
+    return BlendState | StencilState | DepthState;
+}
 
-            case QSGRendererInterface::Software:
-            default:
-                qWarning("No path backend for this graphics API yet");
-                break;
-        }
-    }
+QSGRenderNode::RenderingFlags QPathRenderNode::flags() const
+{
+    return BoundedRectRendering | DepthAwareRendering;
+}
 
-    return n;
+QRectF QPathRenderNode::rect() const
+{
+    return QRect(0, 0, m_item->width(), m_item->height());
 }

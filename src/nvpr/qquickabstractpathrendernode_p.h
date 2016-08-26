@@ -34,56 +34,31 @@
 **
 ****************************************************************************/
 
-#include "qquickpathitem_p.h"
-#include "qnvprrendernode_p.h"
-#include "qpathrendernode_p.h"
-#include <QSGRendererInterface>
+#ifndef QQUICKABSTRACTPATHRENDERNODE_P_H
+#define QQUICKABSTRACTPATHRENDERNODE_P_H
 
-class QQuickPathItemPrivate
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include <QtNVPR/qtnvprglobal.h>
+#include <qsgrendernode.h>
+
+QT_BEGIN_NAMESPACE
+
+class QQuickAbstractPathRenderNode : public QSGRenderNode
 {
 public:
+    // ###
 };
 
-QQuickPathItem::QQuickPathItem(QQuickItem *parent)
-    : QQuickItem(parent),
-      d(new QQuickPathItemPrivate)
-{
-    setFlag(ItemHasContents);
-}
+QT_END_NAMESPACE
 
-QQuickPathItem::~QQuickPathItem()
-{
-    delete d;
-}
-
-QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
-{
-    QQuickAbstractPathRenderNode *n = static_cast<QQuickAbstractPathRenderNode *>(node);
-
-    if (!n) {
-        QSGRendererInterface *ri = window()->rendererInterface();
-        if (!ri)
-            return nullptr;
-        switch (ri->graphicsApi()) {
-#ifndef QT_NO_OPENGL
-            case QSGRendererInterface::OpenGL:
-                if (QNvprRenderNode::isSupported())
-                    n = new QNvprRenderNode(this);
-                else
-                    n = new QPathRenderNode(this);
-                break;
 #endif
-
-            case QSGRendererInterface::Direct3D12:
-                n = new QPathRenderNode(this);
-                break;
-
-            case QSGRendererInterface::Software:
-            default:
-                qWarning("No path backend for this graphics API yet");
-                break;
-        }
-    }
-
-    return n;
-}

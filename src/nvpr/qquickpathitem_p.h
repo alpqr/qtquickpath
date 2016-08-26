@@ -53,12 +53,18 @@
 
 QT_BEGIN_NAMESPACE
 
+class QQuickPathItemPrivate;
+
 class QNVPR_EXPORT QQuickPathItem : public QQuickItem
 {
 public:
     QQuickPathItem(QQuickItem *parent = nullptr);
+    ~QQuickPathItem();
 
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
+
+private:
+    QQuickPathItemPrivate *d;
 };
 
 QT_END_NAMESPACE

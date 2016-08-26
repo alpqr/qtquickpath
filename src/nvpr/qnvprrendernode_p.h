@@ -48,19 +48,19 @@
 // We mean it.
 //
 
-#include "qquickpathrendernode_p.h"
+#include "qquickabstractpathrendernode_p.h"
+#include "qnvpr.h"
 
 #ifndef QT_NO_OPENGL
 
 QT_BEGIN_NAMESPACE
 
-class QQuickItem;
-class QNvprRenderNodePrivate;
+class QQuickPathItem;
 
-class QNVPR_EXPORT QNvprRenderNode : public QQuickPathRenderNode
+class QNvprRenderNode : public QQuickAbstractPathRenderNode
 {
 public:
-    QNvprRenderNode(QQuickItem *item);
+    QNvprRenderNode(QQuickPathItem *item);
     ~QNvprRenderNode();
 
     void render(const RenderState *state) override;
@@ -72,7 +72,11 @@ public:
     static bool isSupported();
 
 private:
-    QNvprRenderNodePrivate *d;
+    QQuickPathItem *m_item;
+    QNvPathRendering m_nvpr;
+    GLuint m_pp = 0;
+    GLuint m_fs = 0;
+    int m_colorLoc;
 };
 
 QT_END_NAMESPACE

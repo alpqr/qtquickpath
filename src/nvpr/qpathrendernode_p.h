@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QQUICKPATHRENDERNODE_P_H
-#define QQUICKPATHRENDERNODE_P_H
+#ifndef QPATHRENDERNODE_P_H
+#define QPATHRENDERNODE_P_H
 
 //
 //  W A R N I N G
@@ -48,15 +48,26 @@
 // We mean it.
 //
 
-#include <QtNVPR/qtnvprglobal.h>
-#include <qsgrendernode.h>
+#include "qquickabstractpathrendernode_p.h"
 
 QT_BEGIN_NAMESPACE
 
-class QNVPR_EXPORT QQuickPathRenderNode : public QSGRenderNode
+class QQuickPathItem;
+
+class QPathRenderNode : public QQuickAbstractPathRenderNode
 {
 public:
-    // ###
+    QPathRenderNode(QQuickPathItem *item);
+    ~QPathRenderNode();
+
+    void render(const RenderState *state) override;
+    void releaseResources() override;
+    StateFlags changedStates() const override;
+    RenderingFlags flags() const override;
+    QRectF rect() const override;
+
+private:
+    QQuickPathItem *m_item;
 };
 
 QT_END_NAMESPACE
