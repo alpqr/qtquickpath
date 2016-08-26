@@ -40,12 +40,17 @@
 
 #ifndef QT_NO_OPENGL
 
-#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
 
 class QNvprRenderNodePrivate
 {
 public:
     QQuickItem *item;
+
+    QNvPathRendering nvpr;
+    GLuint pp = 0;
+    GLuint fs = 0;
+    int colorLoc;
 };
 
 QNvprRenderNode::QNvprRenderNode(QQuickItem *item)
@@ -62,24 +67,108 @@ QNvprRenderNode::~QNvprRenderNode()
 
 void QNvprRenderNode::releaseResources()
 {
+    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
+    if (d->pp) {
+        f->glDeleteProgramPipelines(1, &d->pp);
+        d->pp = 0;
+    }
 }
+
+GLuint pathObj = 42;
 
 void QNvprRenderNode::render(const RenderState *state)
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    // ### just to see that the node is active
-    f->glClearColor(1, 0, 0, 1);
-    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
+
+    // no API yet, just do some hard-coded rendering
+
+    if (!d->pp) {
+        if (!d->nvpr.create())
+            qFatal("NVPR init failed");
+
+        static const char *fragSrc =
+            "#version 310 es\n"
+            "precision highp float;\n"
+            "out vec4 fragColor;\n"
+            "uniform vec4 color;\n"
+            "void main() {\n"
+            "  fragColor = color;\n"
+            "}\n";
+
+        if (!d->nvpr.createFragmentOnlyPipeline(fragSrc, &d->pp, &d->fs))
+            qFatal("Failed to create shader program");
+
+        d->colorLoc = f->glGetProgramResourceLocation(d->fs, GL_UNIFORM, "color");
+        Q_ASSERT(d->colorLoc >= 0);
+
+        qDebug("nvpr render node inited");
+    }
+
+    // from nvpr_basic.c in NVprSDK
+    // will be upside-down and out of bounds but nevermind for now
+
+    f->glBindProgramPipeline(d->pp);
+
+    static const GLubyte pathCommands[10] =
+      { GL_MOVE_TO_NV, GL_LINE_TO_NV, GL_LINE_TO_NV, GL_LINE_TO_NV,
+        GL_LINE_TO_NV, GL_CLOSE_PATH_NV,
+        'M', 'C', 'C', 'Z' };  // character aliases
+    static const GLshort pathCoords[12][2] =
+      { {100, 180}, {40, 10}, {190, 120}, {10, 120}, {160, 10},
+        {300,300}, {100,400}, {100,200}, {300,100},
+        {500,200}, {500,400}, {300,300} };
+    d->nvpr.pathCommands(pathObj, 10, pathCommands, 24, GL_SHORT, pathCoords);
+    d->nvpr.pathParameteri(pathObj, GL_PATH_JOIN_STYLE_NV, GL_ROUND_NV);
+    d->nvpr.pathParameterf(pathObj, GL_PATH_STROKE_WIDTH_NV, 6.5);
+
+    // f->glDepthMask(true);
+    // f->glEnable(GL_DEPTH_TEST);
+    // GLfloat slope = -0.05;
+    // GLint bias = -1;
+    // d->nvpr.pathStencilDepthOffset(slope, bias);
+    // d->nvpr.pathCoverDepthFunc(GL_ALWAYS);
+
+    f->glEnable(GL_STENCIL_TEST);
+    f->glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+    f->glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
+
+    d->nvpr.matrixLoadIdentity(GL_PATH_PROJECTION_NV);
+    d->nvpr.matrixLoadf(GL_PATH_MODELVIEW_NV, state->projectionMatrix()->constData());
+    d->nvpr.matrixLoadf(GL_PATH_PROJECTION_NV, matrix()->constData());
+
+    // QMatrix4x4 m = *state->projectionMatrix() * *matrix();
+    // d->nvpr.matrixLoadf(GL_PROJECTION, m.constData());
+    // d->nvpr.matrixLoadIdentity(GL_MODELVIEW);
+//    d->nvpr.matrixLoadf(GL_MODELVIEW, m.constData());
+
+    f->glClearStencil(0);
+    f->glStencilMask(~0);
+    f->glClear(GL_STENCIL_BUFFER_BIT);
+
+    d->nvpr.stencilFillPath(pathObj, GL_COUNT_UP_NV, 0x1F);
+
+    f->glProgramUniform4f(d->pp, d->colorLoc, 0, 1, 0, 1); // green
+    d->nvpr.coverFillPath(pathObj, GL_BOUNDING_BOX_NV);
+
+//    f->glDisable(GL_DEPTH_TEST);
+    d->nvpr.stencilStrokePath(pathObj, 0x1, ~0);
+
+//    f->glEnable(GL_DEPTH_TEST);
+    f->glProgramUniform4f(d->pp, d->colorLoc, 1, 1, 0, 1); // yellow
+    d->nvpr.coverStrokePath(pathObj, GL_CONVEX_HULL_NV);
+
+    f->glBindProgramPipeline(0);
 }
 
 QSGRenderNode::StateFlags QNvprRenderNode::changedStates() const
 {
-    return BlendState | StencilState;
+    return BlendState | StencilState | DepthState;
 }
 
 QSGRenderNode::RenderingFlags QNvprRenderNode::flags() const
 {
-    return BoundedRectRendering | DepthAwareRendering;
+    return 0;
+//    return BoundedRectRendering | DepthAwareRendering;
 }
 
 QRectF QNvprRenderNode::rect() const
