@@ -14,3 +14,10 @@ Tested with Qt 5.8. The work-in-progress QSGRenderNode subclass
 extension, qtbase. The non-Quick classes should function with Qt 5.6 and up (we
 use QOpenGLExtraFunctions to get a proper, cross-platform & cross-API wrapper
 for the ES 3.1-level functions).
+
+*****
+
+Note that all Qt Quick support is work in progress and may not function at all.
+For Quick the focus is not just on NVPR, but also to integrate something similar
+to https://github.com/qtproject/playground-scenegraph/tree/master/shapes/shapesplugin
+for non-NV OpenGL systems, D3D and software.
