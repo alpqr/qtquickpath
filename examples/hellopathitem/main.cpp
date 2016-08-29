@@ -48,8 +48,10 @@ int main(int argc, char **argv)
     QGuiApplication app(argc, argv);
 
     QQuickView v;
-
-    v.setFormat(QNvPathRendering::format());
+    QSurfaceFormat fmt = QNvPathRendering::format();
+    if (QCoreApplication::arguments().contains(QStringLiteral("--multisample")))
+        fmt.setSamples(4);
+    v.setFormat(fmt);
 
     v.setResizeMode(QQuickView::SizeRootObjectToView);
     v.setSource(QUrl("qrc:/main.qml"));

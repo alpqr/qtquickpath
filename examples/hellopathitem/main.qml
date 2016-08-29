@@ -75,6 +75,70 @@ Item {
             strokeMaterial: "white"
             strokeWidth: 4
         }
+
+        // pie
+        PathItem {
+            anchors.right: parent.right
+            anchors.top: parent.top
+            width: 100
+            height: 100
+            strokeMaterial: "blue"
+            fillMaterial: "lightGray"
+            strokeWidth: 2
+            function draw() {
+                moveTo(50, 50)
+                arcTo(20, 30, 60, 40, 60, 240)
+                closeSubPath()
+            }
+            Component.onCompleted: draw()
+            ColorAnimation on fillMaterial {
+                from: "lightGray"
+                to: "brown"
+                duration: 5000
+                loops: Animation.Infinite
+            }
+        }
+
+        // bezier
+        PathItem {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            width: 100
+            height: 100
+            strokeMaterial: "blue"
+            fillMaterial: "lightGray"
+            strokeWidth: 2
+            function draw() {
+                moveTo(20, 30);
+                cubicTo(80, 0, 50, 50, 80, 80);
+            }
+            Component.onCompleted: draw()
+        }
+
+        // star
+        PathItem {
+            id: star
+            anchors.bottom: parent.bottom
+            width: 100
+            height: 100
+            strokeMaterial: "blue"
+            fillMaterial: "lightGray"
+            strokeWidth: 2
+            function draw() {
+                moveTo(90, 50);
+                for (var i = 1; i < 5; ++i)
+                    lineTo(50 + 40 * Math.cos(0.8 * i * Math.PI),
+                           50 + 40 * Math.sin(0.8 * i * Math.PI))
+                closeSubPath()
+            }
+            Component.onCompleted: draw()
+            Timer {
+                interval: 1000
+                onTriggered: star.fillRule = (star.fillRule === PathItem.OddEvenFill ? PathItem.WindingFill : PathItem.OddEvenFill)
+                repeat: true
+                running: true
+            }
+        }
     }
 
     MouseArea {
