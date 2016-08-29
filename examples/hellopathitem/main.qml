@@ -4,7 +4,10 @@ import QtQuick.PathItem 2.0
 Item {
     Rectangle {
         id: r
-        color: "purple"
+        gradient: Gradient {
+            GradientStop { position: 0; color: "steelblue" }
+            GradientStop { position: 1; color: "black" }
+        }
         anchors.fill: parent
     }
 
