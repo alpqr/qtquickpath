@@ -173,7 +173,19 @@ void QNvprPathRenderer::setPath(const QPainterPath &path)
     // ###
 }
 
-void QNvprPathRenderer::setMaterial(const QColor &color)
+void QNvprPathRenderer::setFillMaterial(const QColor &color)
+{
+}
+
+void QNvprPathRenderer::setStrokeMaterial(const QColor &color)
+{
+}
+
+void QNvprPathRenderer::setStrokeWidth(qreal w)
+{
+}
+
+void QNvprPathRenderer::commit()
 {
 }
 

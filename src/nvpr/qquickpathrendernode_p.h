@@ -51,36 +51,59 @@
 #include "qquickabstractpathrenderer_p.h"
 #include <qsgnode.h>
 #include <qsggeometry.h>
+#include <QtGui/private/qtriangulatingstroker_p.h>
 
 QT_BEGIN_NAMESPACE
 
 class QQuickPathItem;
-class QQuickPathRenderNode;
+class QQuickPathRootRenderNode;
 
 class QQuickPathRenderer : public QQuickAbstractPathRenderer
 {
 public:
-    QQuickPathRenderer(QQuickPathRenderNode *rn) : m_node(rn) { }
+    QQuickPathRenderer(QQuickPathRootRenderNode *rn) : m_rootNode(rn) { }
 
     void setPath(const QPainterPath &path) override;
-    void setMaterial(const QColor &color) override;
+    void setFillMaterial(const QColor &color) override;
+    void setStrokeMaterial(const QColor &color) override;
+    void setStrokeWidth(qreal w) override;
+    void commit() override;
 
 private:
-    QQuickPathRenderNode *m_node;
+    void fill();
+    void stroke();
+
+    QQuickPathRootRenderNode *m_rootNode;
+    QPainterPath m_path;
     QVector<QSGGeometry::Point2D> m_vertices;
     QVector<quint16> m_indices;
+    QTriangulatingStroker m_stroker;
+    qreal m_strokeWidth;
 };
 
 class QQuickPathRenderNode : public QSGGeometryNode
 {
 public:
-    QQuickPathRenderNode(QQuickPathItem *item);
+    QQuickPathRenderNode();
     ~QQuickPathRenderNode();
 
 private:
-    QQuickPathItem *m_item;
     QSGGeometry m_geometry;
     QScopedPointer<QSGMaterial> m_material;
+
+    friend class QQuickPathRenderer;
+};
+
+class QQuickPathRootRenderNode : public QSGNode
+{
+public:
+    QQuickPathRootRenderNode(QQuickPathItem *item);
+    ~QQuickPathRootRenderNode();
+
+private:
+    QQuickPathItem *m_item;
+    QQuickPathRenderNode *m_fillNode;
+    QQuickPathRenderNode *m_strokeNode;
 
     friend class QQuickPathRenderer;
 };

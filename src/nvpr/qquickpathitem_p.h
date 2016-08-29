@@ -58,7 +58,7 @@ class QQuickPathItemPrivate;
 class QNVPR_EXPORT QQuickPathItem : public QQuickItem
 {
     Q_OBJECT
-    Q_PROPERTY(QVariant fillMaterial READ fillMaterial WRITE setFillMaterial NOTIFY fillMaterialChanged) // QColor or shader source string or ...
+    Q_PROPERTY(QVariant fillMaterial READ fillMaterial WRITE setFillMaterial NOTIFY fillMaterialChanged)
     Q_PROPERTY(FillRule fillRule READ fillRule WRITE setFillRule NOTIFY fillRuleChanged)
     Q_PROPERTY(QVariant strokeMaterial READ strokeMaterial WRITE setStrokeMaterial NOTIFY strokeMaterialChanged)
     Q_PROPERTY(qreal strokeWidth READ strokeWidth WRITE setStrokeWidth NOTIFY strokeWidthChanged)
@@ -87,6 +87,7 @@ public:
     Q_INVOKABLE void addRect(qreal x, qreal y, qreal w, qreal h);
     Q_INVOKABLE void addRoundedRect(qreal x, qreal y, qreal w, qreal h, qreal xr, qreal yr);
     Q_INVOKABLE void addEllipse(qreal x, qreal y, qreal rx, qreal ry);
+    Q_INVOKABLE void addEllipseWithCenter(qreal cx, qreal cy, qreal rx, qreal ry);
 
     Q_INVOKABLE QPointF currentPosition() const;
     Q_INVOKABLE QRectF boundingRect() const;

@@ -65,7 +65,10 @@ public:
     QNvprPathRenderer(QNvprRenderNode *rn) : m_node(rn) { }
 
     void setPath(const QPainterPath &path) override;
-    void setMaterial(const QColor &color) override;
+    void setFillMaterial(const QColor &color) override;
+    void setStrokeMaterial(const QColor &color) override;
+    void setStrokeWidth(qreal w) override;
+    void commit() override;
 
 private:
     QNvprRenderNode *m_node;

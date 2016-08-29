@@ -48,7 +48,7 @@ public:
     QQuickPathItemPrivate()
         : renderer(nullptr),
           dirty(0),
-          strokeWidth(0),
+          strokeWidth(1),
           strokeColor(Qt::white),
           fillColor(Qt::white)
     { }
@@ -56,8 +56,9 @@ public:
 
     enum Dirty {
         DirtyPath = 0x01,
-        DirtyStrokeMaterial = 0x02,
-        DirtyFillMaterial = 0x04
+        DirtyFillMaterial = 0x02,
+        DirtyStrokeMaterial = 0x04,
+        DirtyStrokeWidth = 0x08
     };
 
     QPainterPath path;
@@ -93,15 +94,15 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
                     node = new QNvprRenderNode(this);
                     d->renderer = new QNvprPathRenderer(static_cast<QNvprRenderNode *>(node));
                 } else {
-                    node = new QQuickPathRenderNode(this);
-                    d->renderer = new QQuickPathRenderer(static_cast<QQuickPathRenderNode *>(node));
+                    node = new QQuickPathRootRenderNode(this);
+                    d->renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
                 }
                 break;
 #endif
 
             case QSGRendererInterface::Direct3D12:
-                node = new QQuickPathRenderNode(this);
-                d->renderer = new QQuickPathRenderer(static_cast<QQuickPathRenderNode *>(node));
+                node = new QQuickPathRootRenderNode(this);
+                d->renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
                 break;
 
             case QSGRendererInterface::Software:
@@ -109,17 +110,28 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
                 qWarning("No path backend for this graphics API yet");
                 break;
         }
-        d->dirty |= QQuickPathItemPrivate::DirtyPath;
+        d->dirty |= 0xFFFF;
     }
 
+    const bool wasDirty = d->dirty != 0;
     if (d->dirty & QQuickPathItemPrivate::DirtyPath) {
         d->renderer->setPath(d->path);
         d->dirty &= ~QQuickPathItemPrivate::DirtyPath;
     }
     if (d->dirty & QQuickPathItemPrivate::DirtyFillMaterial) {
-        d->renderer->setMaterial(d->fillColor);
+        d->renderer->setFillMaterial(d->fillColor);
         d->dirty &= ~QQuickPathItemPrivate::DirtyFillMaterial;
     }
+    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeMaterial) {
+        d->renderer->setStrokeMaterial(d->strokeColor);
+        d->dirty &= ~QQuickPathItemPrivate::DirtyStrokeMaterial;
+    }
+    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeWidth) {
+        d->renderer->setStrokeWidth(d->strokeWidth);
+        d->dirty &= ~QQuickPathItemPrivate::DirtyStrokeWidth;
+    }
+    if (wasDirty)
+        d->renderer->commit();
 
     return node;
 }
@@ -195,6 +207,12 @@ void QQuickPathItem::addEllipse(qreal x, qreal y, qreal rx, qreal ry)
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
+void QQuickPathItem::addEllipseWithCenter(qreal cx, qreal cy, qreal rx, qreal ry)
+{
+    d->path.addEllipse(QPointF(cx, cy), rx, ry);
+    d->dirty |= QQuickPathItemPrivate::DirtyPath;
+}
+
 QPointF QQuickPathItem::currentPosition() const
 {
     return d->path.currentPosition();
@@ -221,6 +239,7 @@ void QQuickPathItem::setFillRule(FillRule fillRule)
         d->path.setFillRule(Qt::FillRule(fillRule));
         d->dirty |= QQuickPathItemPrivate::DirtyPath;
         emit fillRuleChanged();
+        update();
     }
 }
 
@@ -231,6 +250,7 @@ QVariant QQuickPathItem::fillMaterial() const
 
 void QQuickPathItem::setFillMaterial(const QVariant &material)
 {
+    // ### only color for now but could be a shader source string later on...
     if (material.type() != QVariant::Color) {
         qWarning("Unknown fill material");
         return;
@@ -240,6 +260,7 @@ void QQuickPathItem::setFillMaterial(const QVariant &material)
         d->fillColor = color;
         d->dirty |= QQuickPathItemPrivate::DirtyFillMaterial;
         emit fillMaterialChanged();
+        update();
     }
 }
 
@@ -250,16 +271,32 @@ QVariant QQuickPathItem::strokeMaterial() const
 
 void QQuickPathItem::setStrokeMaterial(const QVariant &material)
 {
-    // ###
+    if (material.type() != QVariant::Color) {
+        qWarning("Unknown stroke material");
+        return;
+    }
+    const QColor color = material.value<QColor>();
+    if (d->strokeColor != color) {
+        d->strokeColor = color;
+        d->dirty |= QQuickPathItemPrivate::DirtyStrokeMaterial;
+        emit strokeMaterialChanged();
+        update();
+    }
 }
 
 qreal QQuickPathItem::strokeWidth() const
 {
-    return 0;
+    return d->strokeWidth;
 }
 
 void QQuickPathItem::setStrokeWidth(qreal w)
 {
+    if (d->strokeWidth != w) {
+        d->strokeWidth = w;
+        d->dirty |= QQuickPathItemPrivate::DirtyStrokeWidth;
+        emit strokeWidthChanged();
+        update();
+    }
 }
 
 QT_END_NAMESPACE

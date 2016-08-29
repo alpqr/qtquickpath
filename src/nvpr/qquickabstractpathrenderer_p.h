@@ -58,8 +58,13 @@ class QQuickAbstractPathRenderer
 {
 public:
     virtual ~QQuickAbstractPathRenderer() { }
+
     virtual void setPath(const QPainterPath &path) = 0;
-    virtual void setMaterial(const QColor &color) = 0;
+    virtual void setFillMaterial(const QColor &color) = 0;
+    virtual void setStrokeMaterial(const QColor &color) = 0;
+    virtual void setStrokeWidth(qreal w) = 0;
+
+    virtual void commit() = 0;
 };
 
 QT_END_NAMESPACE

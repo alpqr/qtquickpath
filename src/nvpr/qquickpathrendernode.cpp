@@ -41,9 +41,21 @@
 
 QT_BEGIN_NAMESPACE
 
-QQuickPathRenderNode::QQuickPathRenderNode(QQuickPathItem *item)
-    : m_item(item),
-      m_geometry(QSGGeometry::defaultAttributes_Point2D(), 0, 0)
+QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickPathItem *item)
+    : m_item(item)
+{
+    m_fillNode = new QQuickPathRenderNode;
+    appendChildNode(m_fillNode);
+    m_strokeNode = new QQuickPathRenderNode;
+    appendChildNode(m_strokeNode);
+}
+
+QQuickPathRootRenderNode::~QQuickPathRootRenderNode()
+{
+}
+
+QQuickPathRenderNode::QQuickPathRenderNode()
+    : m_geometry(QSGGeometry::defaultAttributes_Point2D(), 0, 0)
 {
     setGeometry(&m_geometry);
     m_material.reset(new QSGFlatColorMaterial);
@@ -56,32 +68,57 @@ QQuickPathRenderNode::~QQuickPathRenderNode()
 
 void QQuickPathRenderer::setPath(const QPainterPath &path)
 {
-    QSGGeometry *g = &m_node->m_geometry;
+    m_path = path;
+}
 
-    if (path.isEmpty()) {
+void QQuickPathRenderer::setFillMaterial(const QColor &color)
+{
+    QQuickPathRenderNode *n = m_rootNode->m_fillNode;
+    static_cast<QSGFlatColorMaterial *>(n->m_material.data())->setColor(color);
+    n->markDirty(QSGNode::DirtyMaterial);
+    // ### these don't really need geometry regeneration in commit()
+}
+
+void QQuickPathRenderer::setStrokeMaterial(const QColor &color)
+{
+    QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
+    static_cast<QSGFlatColorMaterial *>(n->m_material.data())->setColor(color);
+    n->markDirty(QSGNode::DirtyMaterial);
+}
+
+void QQuickPathRenderer::setStrokeWidth(qreal w)
+{
+    m_strokeWidth = w;
+}
+
+void QQuickPathRenderer::fill()
+{
+    QQuickPathRenderNode *n = m_rootNode->m_fillNode;
+    QSGGeometry *g = &n->m_geometry;
+    if (m_path.isEmpty()) {
         g->allocate(0, 0);
-        m_node->markDirty(QSGNode::DirtyGeometry);
+        n->markDirty(QSGNode::DirtyGeometry);
         return;
     }
+    // ### have a property or something to disable fill
 
-    const qreal scale = 100;
+    const qreal scale = 100; // ### 10000?
+    const QVectorPath &vp = qtVectorPathForPath(m_path);
 
-    QTriangleSet ts = qTriangulate(path, QTransform::fromScale(scale, scale));
-    qDebug() << ts.vertices;
-
-    m_vertices.resize(ts.vertices.size() / 2);
+    QTriangleSet ts = qTriangulate(vp, QTransform::fromScale(scale, scale));
+    m_vertices.resize(ts.vertices.count() / 2);
     QSGGeometry::Point2D *vdst = m_vertices.data();
     const qreal *vdata = ts.vertices.constData();
-    for (int i = 0; i < ts.vertices.size() / 2; ++i)
+    for (int i = 0; i < ts.vertices.count() / 2; ++i)
         vdst[i].set(vdata[i * 2] / scale, vdata[i * 2 + 1] / scale);
 
     m_indices.resize(ts.indices.size());
     quint16 *idst = m_indices.data();
     if (ts.indices.type() == QVertexIndexVector::UnsignedShort) {
-        memcpy(idst, ts.indices.data(), m_indices.size() * sizeof(quint16));
+        memcpy(idst, ts.indices.data(), m_indices.count() * sizeof(quint16));
     } else {
         const quint32 *isrc = (const quint32 *) ts.indices.data();
-        for (int i = 0; i < m_indices.size(); ++i)
+        for (int i = 0; i < m_indices.count(); ++i)
             idst[i] = isrc[i];
     }
 
@@ -89,13 +126,41 @@ void QQuickPathRenderer::setPath(const QPainterPath &path)
     g->setDrawingMode(QSGGeometry::DrawTriangles);
     memcpy(g->vertexData(), m_vertices.constData(), g->vertexCount() * g->sizeOfVertex());
     memcpy(g->indexData(), m_indices.constData(), g->indexCount() * g->sizeOfIndex());
-    m_node->markDirty(QSGNode::DirtyGeometry);
+    n->markDirty(QSGNode::DirtyGeometry);
 }
 
-void QQuickPathRenderer::setMaterial(const QColor &color)
+void QQuickPathRenderer::stroke()
 {
-    static_cast<QSGFlatColorMaterial *>(m_node->m_material.data())->setColor(color);
-    m_node->markDirty(QSGNode::DirtyMaterial);
+    QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
+    QSGGeometry *g = &n->m_geometry;
+    if (m_path.isEmpty() || qFuzzyIsNull(m_strokeWidth)) {
+        g->allocate(0, 0);
+        n->markDirty(QSGNode::DirtyGeometry);
+        return;
+    }
+
+    const qreal scale = 100; // ### 10000?
+    const QVectorPath &vp = qtVectorPathForPath(m_path);
+
+    QRectF clip(0, 0, m_rootNode->m_item->width(), m_rootNode->m_item->height());
+    QPen pen;
+    pen.setWidth(m_strokeWidth);
+    const qreal inverseScale = 1 / scale;
+    m_stroker.setInvScale(inverseScale);
+    m_stroker.process(vp, pen, clip, 0);
+    if (!m_stroker.vertexCount())
+        return;
+
+    g->allocate(m_stroker.vertexCount() / 2, 0);
+    g->setDrawingMode(QSGGeometry::DrawTriangleStrip);
+    memcpy(g->vertexData(), m_stroker.vertices(), g->vertexCount() * g->sizeOfVertex());
+    n->markDirty(QSGNode::DirtyGeometry);
+}
+
+void QQuickPathRenderer::commit()
+{
+    fill();
+    stroke();
 }
 
 QT_END_NAMESPACE
