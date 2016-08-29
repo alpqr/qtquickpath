@@ -57,11 +57,61 @@ class QQuickPathItemPrivate;
 
 class QNVPR_EXPORT QQuickPathItem : public QQuickItem
 {
+    Q_OBJECT
+    Q_PROPERTY(QVariant fillMaterial READ fillMaterial WRITE setFillMaterial NOTIFY fillMaterialChanged) // QColor or shader source string or ...
+    Q_PROPERTY(FillRule fillRule READ fillRule WRITE setFillRule NOTIFY fillRuleChanged)
+    Q_PROPERTY(QVariant strokeMaterial READ strokeMaterial WRITE setStrokeMaterial NOTIFY strokeMaterialChanged)
+    Q_PROPERTY(qreal strokeWidth READ strokeWidth WRITE setStrokeWidth NOTIFY strokeWidthChanged)
+
 public:
+    enum FillRule {
+        OddEvenFill = Qt::OddEvenFill,
+        WindingFill = Qt::WindingFill
+    };
+    Q_ENUM(FillRule)
+
     QQuickPathItem(QQuickItem *parent = nullptr);
     ~QQuickPathItem();
 
+    Q_INVOKABLE void clear();
+    Q_INVOKABLE bool isEmpty() const;
+    Q_INVOKABLE void closeSubPath();
+
+    Q_INVOKABLE void moveTo(qreal x, qreal y);
+    Q_INVOKABLE void lineTo(qreal x, qreal y);
+    Q_INVOKABLE void arcMoveTo(qreal x, qreal y, qreal w, qreal h, qreal angle);
+    Q_INVOKABLE void arcTo(qreal x, qreal y, qreal w, qreal h, qreal startAngle, qreal arcLength);
+    Q_INVOKABLE void cubicTo(qreal c1x, qreal c1y, qreal c2x, qreal c2y, qreal endX, qreal endY);
+    Q_INVOKABLE void quadTo(qreal cX, qreal cY, qreal endX, qreal endY);
+
+    Q_INVOKABLE void addRect(qreal x, qreal y, qreal w, qreal h);
+    Q_INVOKABLE void addRoundedRect(qreal x, qreal y, qreal w, qreal h, qreal xr, qreal yr);
+    Q_INVOKABLE void addEllipse(qreal x, qreal y, qreal rx, qreal ry);
+
+    Q_INVOKABLE QPointF currentPosition() const;
+    Q_INVOKABLE QRectF boundingRect() const;
+    Q_INVOKABLE QRectF controlPointRect() const;
+
+    QVariant fillMaterial() const;
+    void setFillMaterial(const QVariant &material);
+
+    FillRule fillRule() const;
+    void setFillRule(FillRule fillRule);
+
+    QVariant strokeMaterial() const;
+    void setStrokeMaterial(const QVariant &material);
+
+    qreal strokeWidth() const;
+    void setStrokeWidth(qreal w);
+
+protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
+
+signals:
+    void fillMaterialChanged();
+    void fillRuleChanged();
+    void strokeMaterialChanged();
+    void strokeWidthChanged();
 
 private:
     QQuickPathItemPrivate *d;

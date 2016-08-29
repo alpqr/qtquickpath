@@ -40,6 +40,8 @@
 
 #ifndef QT_NO_OPENGL
 
+QT_BEGIN_NAMESPACE
+
 QNvprRenderNode::QNvprRenderNode(QQuickPathItem *item)
     : m_item(item)
 {
@@ -165,5 +167,16 @@ bool QNvprRenderNode::isSupported()
 {
     return QNvPathRendering::isSupported();
 }
+
+void QNvprPathRenderer::setPath(const QPainterPath &path)
+{
+    // ###
+}
+
+void QNvprPathRenderer::setMaterial(const QColor &color)
+{
+}
+
+QT_END_NAMESPACE
 
 #endif // QT_NO_OPENGL

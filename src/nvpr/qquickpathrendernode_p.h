@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QPATHRENDERNODE_P_H
-#define QPATHRENDERNODE_P_H
+#ifndef QQUICKPATHRENDERNODE_P_H
+#define QQUICKPATHRENDERNODE_P_H
 
 //
 //  W A R N I N G
@@ -48,26 +48,41 @@
 // We mean it.
 //
 
-#include "qquickabstractpathrendernode_p.h"
+#include "qquickabstractpathrenderer_p.h"
+#include <qsgnode.h>
+#include <qsggeometry.h>
 
 QT_BEGIN_NAMESPACE
 
 class QQuickPathItem;
+class QQuickPathRenderNode;
 
-class QPathRenderNode : public QQuickAbstractPathRenderNode
+class QQuickPathRenderer : public QQuickAbstractPathRenderer
 {
 public:
-    QPathRenderNode(QQuickPathItem *item);
-    ~QPathRenderNode();
+    QQuickPathRenderer(QQuickPathRenderNode *rn) : m_node(rn) { }
 
-    void render(const RenderState *state) override;
-    void releaseResources() override;
-    StateFlags changedStates() const override;
-    RenderingFlags flags() const override;
-    QRectF rect() const override;
+    void setPath(const QPainterPath &path) override;
+    void setMaterial(const QColor &color) override;
+
+private:
+    QQuickPathRenderNode *m_node;
+    QVector<QSGGeometry::Point2D> m_vertices;
+    QVector<quint16> m_indices;
+};
+
+class QQuickPathRenderNode : public QSGGeometryNode
+{
+public:
+    QQuickPathRenderNode(QQuickPathItem *item);
+    ~QQuickPathRenderNode();
 
 private:
     QQuickPathItem *m_item;
+    QSGGeometry m_geometry;
+    QScopedPointer<QSGMaterial> m_material;
+
+    friend class QQuickPathRenderer;
 };
 
 QT_END_NAMESPACE

@@ -34,41 +34,34 @@
 **
 ****************************************************************************/
 
-#include "qpathrendernode_p.h"
-#include "qquickpathitem_p.h"
-#include <QOpenGLExtraFunctions>
+#ifndef QQUICKABSTRACTPATHRENDERER_P_H
+#define QQUICKABSTRACTPATHRENDERER_P_H
 
-QPathRenderNode::QPathRenderNode(QQuickPathItem *item)
-    : m_item(item)
-{
-}
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
 
-QPathRenderNode::~QPathRenderNode()
-{
-    releaseResources();
-}
+#include <QtNVPR/qtnvprglobal.h>
+#include <QPainterPath>
+#include <QColor>
 
-void QPathRenderNode::releaseResources()
-{
-//    QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
-}
+QT_BEGIN_NAMESPACE
 
-void QPathRenderNode::render(const RenderState *state)
+class QQuickAbstractPathRenderer
 {
-    //QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
-}
+public:
+    virtual ~QQuickAbstractPathRenderer() { }
+    virtual void setPath(const QPainterPath &path) = 0;
+    virtual void setMaterial(const QColor &color) = 0;
+};
 
-QSGRenderNode::StateFlags QPathRenderNode::changedStates() const
-{
-    return BlendState | StencilState | DepthState;
-}
+QT_END_NAMESPACE
 
-QSGRenderNode::RenderingFlags QPathRenderNode::flags() const
-{
-    return BoundedRectRendering | DepthAwareRendering;
-}
-
-QRectF QPathRenderNode::rect() const
-{
-    return QRect(0, 0, m_item->width(), m_item->height());
-}
+#endif

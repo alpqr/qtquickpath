@@ -48,7 +48,8 @@
 // We mean it.
 //
 
-#include "qquickabstractpathrendernode_p.h"
+#include "qquickabstractpathrenderer_p.h"
+#include <qsgrendernode.h>
 #include "qnvpr.h"
 
 #ifndef QT_NO_OPENGL
@@ -56,8 +57,21 @@
 QT_BEGIN_NAMESPACE
 
 class QQuickPathItem;
+class QNvprRenderNode;
 
-class QNvprRenderNode : public QQuickAbstractPathRenderNode
+class QNvprPathRenderer : public QQuickAbstractPathRenderer
+{
+public:
+    QNvprPathRenderer(QNvprRenderNode *rn) : m_node(rn) { }
+
+    void setPath(const QPainterPath &path) override;
+    void setMaterial(const QColor &color) override;
+
+private:
+    QNvprRenderNode *m_node;
+};
+
+class QNvprRenderNode : public QSGRenderNode
 {
 public:
     QNvprRenderNode(QQuickPathItem *item);
