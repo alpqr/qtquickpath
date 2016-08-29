@@ -1,3 +1,17 @@
+
+This repo is now repurposed for Qt Quick PathItem development, targeting not
+just GL_NV_path_rendering but all Qt Quick backends.
+
+The end goal is to productize something similar to
+https://github.com/qtproject/playground-scenegraph/tree/master/shapes/shapesplugin
+but with support for stroking, more materials, multiple backends, and
+additional true declarative items for commonly used shapes.
+
+Right now only the generic OpenGL backend is functional, using triangulating
+stroke and fill from QOpenGLPaintEngine.
+
+*****
+
 Qt experiments for GL_NV_path_rendering, targeting both OpenGL 4.3+ and OpenGL
 ES 3.1+. This is important since writing cross-GL-GLES code is non-trivial. For
 instance, the standard NVPR examples using the fixed pipeline are a
@@ -14,10 +28,3 @@ Tested with Qt 5.8. The work-in-progress QSGRenderNode subclass
 extension, qtbase. The non-Quick classes should function with Qt 5.6 and up (we
 use QOpenGLExtraFunctions to get a proper, cross-platform & cross-API wrapper
 for the ES 3.1-level functions).
-
-*****
-
-Note that all Qt Quick support is work in progress and may not function at all.
-For Quick the focus is not just on NVPR, but also to integrate something similar
-to https://github.com/qtproject/playground-scenegraph/tree/master/shapes/shapesplugin
-for non-NV OpenGL systems, D3D and software.

@@ -8,6 +8,12 @@ Item {
         anchors.fill: parent
     }
 
+    Text {
+        font.pointSize: 20
+        color: "lightGray"
+        text: "QPainterPath + Qt Quick. No Canvas or QQuickPaintedItem involved."
+    }
+
     Rectangle {
         width: 300
         height: 300
