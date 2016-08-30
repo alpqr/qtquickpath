@@ -163,6 +163,7 @@ Item {
 
         }
         fillEnabled: false
+        capStyle: PathItem.RoundCap
         Component.onCompleted: draw()
         Timer {
             interval: 1000

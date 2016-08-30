@@ -70,7 +70,8 @@ public:
     virtual void setStrokeColor(const QColor &color) = 0;
     virtual void setStrokeWidth(qreal w) = 0;
     virtual void setFlags(RenderFlags flags) = 0;
-    virtual void setJoinStyle(QQuickPathItem::JoinStyle joinStyle) = 0;
+    virtual void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) = 0;
+    virtual void setCapStyle(QQuickPathItem::CapStyle capStyle) = 0;
     virtual void endSync() = 0;
 };
 

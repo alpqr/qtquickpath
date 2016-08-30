@@ -193,7 +193,11 @@ void QNvprPathRenderer::setFlags(RenderFlags flags)
 {
 }
 
-void QNvprPathRenderer::setJoinStyle(QQuickPathItem::JoinStyle joinStyle)
+void QNvprPathRenderer::setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit)
+{
+}
+
+void QNvprPathRenderer::setCapStyle(QQuickPathItem::CapStyle capStyle)
 {
 }
 

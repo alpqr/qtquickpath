@@ -105,9 +105,16 @@ void QQuickPathRenderer::setFlags(RenderFlags flags)
     m_needsNewGeom = true;
 }
 
-void QQuickPathRenderer::setJoinStyle(QQuickPathItem::JoinStyle joinStyle)
+void QQuickPathRenderer::setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit)
 {
     m_pen.setJoinStyle(Qt::PenJoinStyle(joinStyle));
+    m_pen.setMiterLimit(miterLimit);
+    m_needsNewGeom = true;
+}
+
+void QQuickPathRenderer::setCapStyle(QQuickPathItem::CapStyle capStyle)
+{
+    m_pen.setCapStyle(Qt::PenCapStyle(capStyle));
     m_needsNewGeom = true;
 }
 

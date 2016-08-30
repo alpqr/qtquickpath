@@ -64,6 +64,8 @@ class QNVPR_EXPORT QQuickPathItem : public QQuickItem
     Q_PROPERTY(QVariant strokeMaterial READ strokeMaterial WRITE setStrokeMaterial NOTIFY strokeMaterialChanged)
     Q_PROPERTY(qreal strokeWidth READ strokeWidth WRITE setStrokeWidth NOTIFY strokeWidthChanged)
     Q_PROPERTY(JoinStyle joinStyle READ joinStyle WRITE setJoinStyle NOTIFY joinStyleChanged)
+    Q_PROPERTY(int miterLimit READ miterLimit WRITE setMiterLimit NOTIFY miterLimitChanged)
+    Q_PROPERTY(CapStyle capStyle READ capStyle WRITE setCapStyle NOTIFY capStyleChanged)
 
 public:
     enum FillRule {
@@ -78,6 +80,13 @@ public:
         RoundJoin = Qt::RoundJoin
     };
     Q_ENUM(JoinStyle)
+
+    enum CapStyle {
+        FlatCap = Qt::FlatCap,
+        SquareCap = Qt::SquareCap,
+        RoundCap = Qt::RoundCap
+    };
+    Q_ENUM(CapStyle)
 
     QQuickPathItem(QQuickItem *parent = nullptr);
     ~QQuickPathItem();
@@ -120,6 +129,12 @@ public:
     JoinStyle joinStyle() const;
     void setJoinStyle(JoinStyle style);
 
+    int miterLimit() const;
+    void setMiterLimit(int limit);
+
+    CapStyle capStyle() const;
+    void setCapStyle(CapStyle style);
+
 protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
 
@@ -130,6 +145,8 @@ signals:
     void strokeMaterialChanged();
     void strokeWidthChanged();
     void joinStyleChanged();
+    void miterLimitChanged();
+    void capStyleChanged();
 
 private:
     QQuickPathItemPrivate *d;

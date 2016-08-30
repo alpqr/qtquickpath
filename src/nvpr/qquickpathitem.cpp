@@ -52,7 +52,9 @@ public:
           strokeColor(Qt::white),
           fillColor(Qt::white),
           flags(0),
-          joinStyle(QQuickPathItem::BevelJoin)
+          joinStyle(QQuickPathItem::BevelJoin),
+          miterLimit(2),
+          capStyle(QQuickPathItem::SquareCap)
     { }
     ~QQuickPathItemPrivate() { delete renderer; }
 
@@ -62,7 +64,7 @@ public:
         DirtyStrokeMaterial = 0x04,
         DirtyStrokeWidth = 0x08,
         DirtyFlags = 0x10,
-        DirtyJoinStyle = 0x20
+        DirtyStyle = 0x20
     };
 
     QPainterPath path;
@@ -73,6 +75,8 @@ public:
     QColor fillColor;
     QQuickAbstractPathRenderer::RenderFlags flags;
     QQuickPathItem::JoinStyle joinStyle;
+    int miterLimit;
+    QQuickPathItem::CapStyle capStyle;
 };
 
 QQuickPathItem::QQuickPathItem(QQuickItem *parent)
@@ -131,8 +135,10 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
         d->renderer->setStrokeWidth(d->strokeWidth);
     if (d->dirty & QQuickPathItemPrivate::DirtyFlags)
         d->renderer->setFlags(d->flags);
-    if (d->dirty & QQuickPathItemPrivate::DirtyJoinStyle)
-        d->renderer->setJoinStyle(d->joinStyle);
+    if (d->dirty & QQuickPathItemPrivate::DirtyStyle) {
+        d->renderer->setJoinStyle(d->joinStyle, d->miterLimit);
+        d->renderer->setCapStyle(d->capStyle);
+    }
 
     d->renderer->endSync();
     d->dirty = 0;
@@ -327,8 +333,38 @@ void QQuickPathItem::setJoinStyle(JoinStyle style)
 {
     if (d->joinStyle != style) {
         d->joinStyle = style;
-        d->dirty |= QQuickPathItemPrivate::DirtyJoinStyle;
+        d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit joinStyleChanged();
+        update();
+    }
+}
+
+int QQuickPathItem::miterLimit() const
+{
+    return d->miterLimit;
+}
+
+void QQuickPathItem::setMiterLimit(int limit)
+{
+    if (d->miterLimit != limit) {
+        d->miterLimit = limit;
+        d->dirty |= QQuickPathItemPrivate::DirtyStyle;
+        emit miterLimitChanged();
+        update();
+    }
+}
+
+QQuickPathItem::CapStyle QQuickPathItem::capStyle() const
+{
+    return d->capStyle;
+}
+
+void QQuickPathItem::setCapStyle(CapStyle style)
+{
+    if (d->capStyle != style) {
+        d->capStyle = style;
+        d->dirty |= QQuickPathItemPrivate::DirtyStyle;
+        emit capStyleChanged();
         update();
     }
 }
