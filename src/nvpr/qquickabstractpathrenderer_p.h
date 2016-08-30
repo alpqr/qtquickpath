@@ -48,7 +48,7 @@
 // We mean it.
 //
 
-#include <QtNVPR/qtnvprglobal.h>
+#include "qquickpathitem_p.h"
 #include <QPainterPath>
 #include <QColor>
 
@@ -70,6 +70,7 @@ public:
     virtual void setStrokeColor(const QColor &color) = 0;
     virtual void setStrokeWidth(qreal w) = 0;
     virtual void setFlags(RenderFlags flags) = 0;
+    virtual void setJoinStyle(QQuickPathItem::JoinStyle joinStyle) = 0;
     virtual void endSync() = 0;
 };
 

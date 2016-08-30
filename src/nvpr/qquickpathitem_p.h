@@ -63,6 +63,7 @@ class QNVPR_EXPORT QQuickPathItem : public QQuickItem
     Q_PROPERTY(FillRule fillRule READ fillRule WRITE setFillRule NOTIFY fillRuleChanged)
     Q_PROPERTY(QVariant strokeMaterial READ strokeMaterial WRITE setStrokeMaterial NOTIFY strokeMaterialChanged)
     Q_PROPERTY(qreal strokeWidth READ strokeWidth WRITE setStrokeWidth NOTIFY strokeWidthChanged)
+    Q_PROPERTY(JoinStyle joinStyle READ joinStyle WRITE setJoinStyle NOTIFY joinStyleChanged)
 
 public:
     enum FillRule {
@@ -70,6 +71,13 @@ public:
         WindingFill = Qt::WindingFill
     };
     Q_ENUM(FillRule)
+
+    enum JoinStyle {
+        MiterJoin = Qt::MiterJoin,
+        BevelJoin = Qt::BevelJoin,
+        RoundJoin = Qt::RoundJoin
+    };
+    Q_ENUM(JoinStyle)
 
     QQuickPathItem(QQuickItem *parent = nullptr);
     ~QQuickPathItem();
@@ -109,6 +117,9 @@ public:
     qreal strokeWidth() const;
     void setStrokeWidth(qreal w);
 
+    JoinStyle joinStyle() const;
+    void setJoinStyle(JoinStyle style);
+
 protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
 
@@ -118,6 +129,7 @@ signals:
     void fillRuleChanged();
     void strokeMaterialChanged();
     void strokeWidthChanged();
+    void joinStyleChanged();
 
 private:
     QQuickPathItemPrivate *d;

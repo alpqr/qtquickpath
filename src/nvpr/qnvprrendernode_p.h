@@ -70,6 +70,7 @@ public:
     void setStrokeColor(const QColor &color) override;
     void setStrokeWidth(qreal w) override;
     void setFlags(RenderFlags flags) override;
+    void setJoinStyle(QQuickPathItem::JoinStyle joinStyle) override;
     void endSync() override;
 
 private:

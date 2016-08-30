@@ -51,7 +51,8 @@ public:
           strokeWidth(1),
           strokeColor(Qt::white),
           fillColor(Qt::white),
-          flags(0)
+          flags(0),
+          joinStyle(QQuickPathItem::BevelJoin)
     { }
     ~QQuickPathItemPrivate() { delete renderer; }
 
@@ -60,7 +61,8 @@ public:
         DirtyFillMaterial = 0x02,
         DirtyStrokeMaterial = 0x04,
         DirtyStrokeWidth = 0x08,
-        DirtyFlags = 0x10
+        DirtyFlags = 0x10,
+        DirtyJoinStyle = 0x20
     };
 
     QPainterPath path;
@@ -70,6 +72,7 @@ public:
     QColor strokeColor;
     QColor fillColor;
     QQuickAbstractPathRenderer::RenderFlags flags;
+    QQuickPathItem::JoinStyle joinStyle;
 };
 
 QQuickPathItem::QQuickPathItem(QQuickItem *parent)
@@ -128,6 +131,8 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
         d->renderer->setStrokeWidth(d->strokeWidth);
     if (d->dirty & QQuickPathItemPrivate::DirtyFlags)
         d->renderer->setFlags(d->flags);
+    if (d->dirty & QQuickPathItemPrivate::DirtyJoinStyle)
+        d->renderer->setJoinStyle(d->joinStyle);
 
     d->renderer->endSync();
     d->dirty = 0;
@@ -309,6 +314,21 @@ void QQuickPathItem::setStrokeWidth(qreal w)
         d->strokeWidth = w;
         d->dirty |= QQuickPathItemPrivate::DirtyStrokeWidth;
         emit strokeWidthChanged();
+        update();
+    }
+}
+
+QQuickPathItem::JoinStyle QQuickPathItem::joinStyle() const
+{
+    return d->joinStyle;
+}
+
+void QQuickPathItem::setJoinStyle(JoinStyle style)
+{
+    if (d->joinStyle != style) {
+        d->joinStyle = style;
+        d->dirty |= QQuickPathItemPrivate::DirtyJoinStyle;
+        emit joinStyleChanged();
         update();
     }
 }

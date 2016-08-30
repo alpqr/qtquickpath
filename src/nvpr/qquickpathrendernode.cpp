@@ -95,13 +95,19 @@ void QQuickPathRenderer::setStrokeColor(const QColor &color)
 
 void QQuickPathRenderer::setStrokeWidth(qreal w)
 {
-    m_strokeWidth = w;
+    m_pen.setWidthF(w);
     m_needsNewGeom = true;
 }
 
 void QQuickPathRenderer::setFlags(RenderFlags flags)
 {
     m_flags = flags;
+    m_needsNewGeom = true;
+}
+
+void QQuickPathRenderer::setJoinStyle(QQuickPathItem::JoinStyle joinStyle)
+{
+    m_pen.setJoinStyle(Qt::PenJoinStyle(joinStyle));
     m_needsNewGeom = true;
 }
 
@@ -153,7 +159,7 @@ void QQuickPathRenderer::stroke()
 {
     QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
     QSGGeometry *g = &n->m_geometry;
-    if (m_path.isEmpty() || qFuzzyIsNull(m_strokeWidth)) {
+    if (m_path.isEmpty() || qFuzzyIsNull(m_pen.widthF())) {
         g->allocate(0, 0);
         n->markDirty(QSGNode::DirtyGeometry);
         return;
@@ -161,12 +167,10 @@ void QQuickPathRenderer::stroke()
 
     const QVectorPath &vp = qtVectorPathForPath(m_path);
 
-    QRectF clip(0, 0, m_rootNode->m_item->width(), m_rootNode->m_item->height());
-    QPen pen;
-    pen.setWidth(m_strokeWidth);
+    const QRectF clip(0, 0, m_rootNode->m_item->width(), m_rootNode->m_item->height());
     const qreal inverseScale = 1 / SCALE;
     m_stroker.setInvScale(inverseScale);
-    m_stroker.process(vp, pen, clip, 0);
+    m_stroker.process(vp, m_pen, clip, 0);
     if (!m_stroker.vertexCount())
         return;
 

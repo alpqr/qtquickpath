@@ -69,6 +69,7 @@ public:
     void setStrokeColor(const QColor &color) override;
     void setStrokeWidth(qreal w) override;
     void setFlags(RenderFlags flags) override;
+    void setJoinStyle(QQuickPathItem::JoinStyle joinStyle) override;
     void endSync() override;
 
 private:
@@ -80,9 +81,9 @@ private:
     QVector<QSGGeometry::Point2D> m_vertices;
     QVector<quint16> m_indices;
     QTriangulatingStroker m_stroker;
-    qreal m_strokeWidth;
     RenderFlags m_flags;
     bool m_needsNewGeom;
+    QPen m_pen;
 };
 
 class QQuickPathRenderNode : public QSGGeometryNode

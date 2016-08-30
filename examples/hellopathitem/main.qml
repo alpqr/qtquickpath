@@ -150,6 +150,35 @@ Item {
         }
     }
 
+    PathItem {
+        x: 50
+        y: 50
+        width: 100
+        height: 100
+        strokeMaterial: "yellow"
+        strokeWidth: 16
+        function draw() {
+            lineTo(50, 100)
+            lineTo(0, 100)
+
+        }
+        fillEnabled: false
+        Component.onCompleted: draw()
+        Timer {
+            interval: 1000
+            repeat: true
+            running: true
+            property variant styles: [ PathItem.BevelJoin, PathItem.MiterJoin, PathItem.RoundJoin ]
+            onTriggered: {
+                for (var i = 0; i < styles.length; ++i)
+                    if (styles[i] === parent.joinStyle) {
+                        parent.joinStyle = styles[(i + 1) % styles.length];
+                        break;
+                    }
+            }
+        }
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: { path.ex = path.ex + 1; r.visible = !r.visible; star.fillEnabled = !star.fillEnabled }
