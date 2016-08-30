@@ -102,13 +102,13 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
         switch (ri->graphicsApi()) {
 #ifndef QT_NO_OPENGL
             case QSGRendererInterface::OpenGL:
-                if (QNvprRenderNode::isSupported()) {
-                    node = new QNvprRenderNode(this);
-                    d->renderer = new QNvprPathRenderer(static_cast<QNvprRenderNode *>(node));
-                } else {
+//                if (QNvprRenderNode::isSupported()) {
+//                    node = new QNvprRenderNode(this);
+//                    d->renderer = new QNvprPathRenderer(static_cast<QNvprRenderNode *>(node));
+//                } else {
                     node = new QQuickPathRootRenderNode(this);
                     d->renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
-                }
+//                }
                 break;
 #endif
 
