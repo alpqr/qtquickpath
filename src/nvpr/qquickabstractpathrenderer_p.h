@@ -59,13 +59,21 @@ class QQuickAbstractPathRenderer
 public:
     virtual ~QQuickAbstractPathRenderer() { }
 
+    enum RenderFlag {
+        RenderNoFill = 0x01
+    };
+    Q_DECLARE_FLAGS(RenderFlags, RenderFlag)
+
     virtual void setPath(const QPainterPath &path) = 0;
     virtual void setFillMaterial(const QColor &color) = 0;
     virtual void setStrokeMaterial(const QColor &color) = 0;
     virtual void setStrokeWidth(qreal w) = 0;
+    virtual void setFlags(RenderFlags flags) = 0;
 
     virtual void commit() = 0;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QQuickAbstractPathRenderer::RenderFlags)
 
 QT_END_NAMESPACE
 

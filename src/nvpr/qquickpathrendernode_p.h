@@ -67,6 +67,7 @@ public:
     void setFillMaterial(const QColor &color) override;
     void setStrokeMaterial(const QColor &color) override;
     void setStrokeWidth(qreal w) override;
+    void setFlags(RenderFlags flags) override;
     void commit() override;
 
 private:
@@ -79,6 +80,7 @@ private:
     QVector<quint16> m_indices;
     QTriangulatingStroker m_stroker;
     qreal m_strokeWidth;
+    RenderFlags m_flags;
 };
 
 class QQuickPathRenderNode : public QSGGeometryNode

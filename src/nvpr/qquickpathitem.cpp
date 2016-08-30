@@ -50,7 +50,8 @@ public:
           dirty(0),
           strokeWidth(1),
           strokeColor(Qt::white),
-          fillColor(Qt::white)
+          fillColor(Qt::white),
+          flags(0)
     { }
     ~QQuickPathItemPrivate() { delete renderer; }
 
@@ -58,7 +59,8 @@ public:
         DirtyPath = 0x01,
         DirtyFillMaterial = 0x02,
         DirtyStrokeMaterial = 0x04,
-        DirtyStrokeWidth = 0x08
+        DirtyStrokeWidth = 0x08,
+        DirtyFlags = 0x10
     };
 
     QPainterPath path;
@@ -67,6 +69,7 @@ public:
     qreal strokeWidth;
     QColor strokeColor;
     QColor fillColor;
+    QQuickAbstractPathRenderer::RenderFlags flags;
 };
 
 QQuickPathItem::QQuickPathItem(QQuickItem *parent)
@@ -114,22 +117,20 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
     }
 
     const bool wasDirty = d->dirty != 0;
-    if (d->dirty & QQuickPathItemPrivate::DirtyPath) {
+
+    if (d->dirty & QQuickPathItemPrivate::DirtyPath)
         d->renderer->setPath(d->path);
-        d->dirty &= ~QQuickPathItemPrivate::DirtyPath;
-    }
-    if (d->dirty & QQuickPathItemPrivate::DirtyFillMaterial) {
+    if (d->dirty & QQuickPathItemPrivate::DirtyFillMaterial)
         d->renderer->setFillMaterial(d->fillColor);
-        d->dirty &= ~QQuickPathItemPrivate::DirtyFillMaterial;
-    }
-    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeMaterial) {
+    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeMaterial)
         d->renderer->setStrokeMaterial(d->strokeColor);
-        d->dirty &= ~QQuickPathItemPrivate::DirtyStrokeMaterial;
-    }
-    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeWidth) {
+    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeWidth)
         d->renderer->setStrokeWidth(d->strokeWidth);
-        d->dirty &= ~QQuickPathItemPrivate::DirtyStrokeWidth;
-    }
+    if (d->dirty & QQuickPathItemPrivate::DirtyFlags)
+        d->renderer->setFlags(d->flags);
+
+    d->dirty = 0;
+
     if (wasDirty)
         d->renderer->commit();
 
@@ -228,6 +229,21 @@ QRectF QQuickPathItem::controlPointRect() const
     return d->path.controlPointRect();
 }
 
+bool QQuickPathItem::fillEnabled() const
+{
+    return !d->flags.testFlag(QQuickAbstractPathRenderer::RenderNoFill);
+}
+
+void QQuickPathItem::setFillEnabled(bool enable)
+{
+    if (fillEnabled() != enable) {
+        d->flags.setFlag(QQuickAbstractPathRenderer::RenderNoFill, !enable);
+        d->dirty |= QQuickPathItemPrivate::DirtyFlags;
+        emit fillEnabledChanged();
+        update();
+    }
+}
+
 QQuickPathItem::FillRule QQuickPathItem::fillRule() const
 {
     return FillRule(d->path.fillRule());
@@ -235,7 +251,7 @@ QQuickPathItem::FillRule QQuickPathItem::fillRule() const
 
 void QQuickPathItem::setFillRule(FillRule fillRule)
 {
-    if (d->path.fillRule() != fillRule) {
+    if (d->path.fillRule() != Qt::FillRule(fillRule)) {
         d->path.setFillRule(Qt::FillRule(fillRule));
         d->dirty |= QQuickPathItemPrivate::DirtyPath;
         emit fillRuleChanged();

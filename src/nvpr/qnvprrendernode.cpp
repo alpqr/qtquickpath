@@ -185,6 +185,10 @@ void QNvprPathRenderer::setStrokeWidth(qreal w)
 {
 }
 
+void QNvprPathRenderer::setFlags(RenderFlags flags)
+{
+}
+
 void QNvprPathRenderer::commit()
 {
 }

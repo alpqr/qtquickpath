@@ -41,6 +41,8 @@
 
 QT_BEGIN_NAMESPACE
 
+static const qreal SCALE = 100;
+
 QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickPathItem *item)
     : m_item(item)
 {
@@ -95,22 +97,20 @@ void QQuickPathRenderer::fill()
 {
     QQuickPathRenderNode *n = m_rootNode->m_fillNode;
     QSGGeometry *g = &n->m_geometry;
-    if (m_path.isEmpty()) {
+    if (m_flags.testFlag(RenderNoFill) || m_path.isEmpty()) {
         g->allocate(0, 0);
         n->markDirty(QSGNode::DirtyGeometry);
         return;
     }
-    // ### have a property or something to disable fill
 
-    const qreal scale = 100; // ### 10000?
     const QVectorPath &vp = qtVectorPathForPath(m_path);
 
-    QTriangleSet ts = qTriangulate(vp, QTransform::fromScale(scale, scale));
+    QTriangleSet ts = qTriangulate(vp, QTransform::fromScale(SCALE, SCALE));
     m_vertices.resize(ts.vertices.count() / 2);
     QSGGeometry::Point2D *vdst = m_vertices.data();
     const qreal *vdata = ts.vertices.constData();
     for (int i = 0; i < ts.vertices.count() / 2; ++i)
-        vdst[i].set(vdata[i * 2] / scale, vdata[i * 2 + 1] / scale);
+        vdst[i].set(vdata[i * 2] / SCALE, vdata[i * 2 + 1] / SCALE);
 
     m_indices.resize(ts.indices.size());
     quint16 *idst = m_indices.data();
@@ -139,13 +139,12 @@ void QQuickPathRenderer::stroke()
         return;
     }
 
-    const qreal scale = 100; // ### 10000?
     const QVectorPath &vp = qtVectorPathForPath(m_path);
 
     QRectF clip(0, 0, m_rootNode->m_item->width(), m_rootNode->m_item->height());
     QPen pen;
     pen.setWidth(m_strokeWidth);
-    const qreal inverseScale = 1 / scale;
+    const qreal inverseScale = 1 / SCALE;
     m_stroker.setInvScale(inverseScale);
     m_stroker.process(vp, pen, clip, 0);
     if (!m_stroker.vertexCount())
@@ -155,6 +154,11 @@ void QQuickPathRenderer::stroke()
     g->setDrawingMode(QSGGeometry::DrawTriangleStrip);
     memcpy(g->vertexData(), m_stroker.vertices(), g->vertexCount() * g->sizeOfVertex());
     n->markDirty(QSGNode::DirtyGeometry);
+}
+
+void QQuickPathRenderer::setFlags(RenderFlags flags)
+{
+    m_flags = flags;
 }
 
 void QQuickPathRenderer::commit()

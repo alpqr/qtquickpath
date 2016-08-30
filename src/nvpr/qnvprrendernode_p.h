@@ -68,6 +68,7 @@ public:
     void setFillMaterial(const QColor &color) override;
     void setStrokeMaterial(const QColor &color) override;
     void setStrokeWidth(qreal w) override;
+    void setFlags(RenderFlags flags) override;
     void commit() override;
 
 private:

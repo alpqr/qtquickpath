@@ -152,6 +152,6 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: { path.ex = path.ex + 1; r.visible = !r.visible }
+        onClicked: { path.ex = path.ex + 1; r.visible = !r.visible; star.fillEnabled = !star.fillEnabled }
     }
 }
