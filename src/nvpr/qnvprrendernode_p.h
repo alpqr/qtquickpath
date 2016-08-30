@@ -64,12 +64,13 @@ class QNvprPathRenderer : public QQuickAbstractPathRenderer
 public:
     QNvprPathRenderer(QNvprRenderNode *rn) : m_node(rn) { }
 
+    void beginSync() override;
     void setPath(const QPainterPath &path) override;
-    void setFillMaterial(const QColor &color) override;
-    void setStrokeMaterial(const QColor &color) override;
+    void setFillColor(const QColor &color) override;
+    void setStrokeColor(const QColor &color) override;
     void setStrokeWidth(qreal w) override;
     void setFlags(RenderFlags flags) override;
-    void commit() override;
+    void endSync() override;
 
 private:
     QNvprRenderNode *m_node;

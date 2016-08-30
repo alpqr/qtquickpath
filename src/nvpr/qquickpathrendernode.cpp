@@ -68,20 +68,25 @@ QQuickPathRenderNode::~QQuickPathRenderNode()
 {
 }
 
+void QQuickPathRenderer::beginSync()
+{
+    m_needsNewGeom = false;
+}
+
 void QQuickPathRenderer::setPath(const QPainterPath &path)
 {
     m_path = path;
+    m_needsNewGeom = true;
 }
 
-void QQuickPathRenderer::setFillMaterial(const QColor &color)
+void QQuickPathRenderer::setFillColor(const QColor &color)
 {
     QQuickPathRenderNode *n = m_rootNode->m_fillNode;
     static_cast<QSGFlatColorMaterial *>(n->m_material.data())->setColor(color);
     n->markDirty(QSGNode::DirtyMaterial);
-    // ### these don't really need geometry regeneration in commit()
 }
 
-void QQuickPathRenderer::setStrokeMaterial(const QColor &color)
+void QQuickPathRenderer::setStrokeColor(const QColor &color)
 {
     QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
     static_cast<QSGFlatColorMaterial *>(n->m_material.data())->setColor(color);
@@ -91,6 +96,21 @@ void QQuickPathRenderer::setStrokeMaterial(const QColor &color)
 void QQuickPathRenderer::setStrokeWidth(qreal w)
 {
     m_strokeWidth = w;
+    m_needsNewGeom = true;
+}
+
+void QQuickPathRenderer::setFlags(RenderFlags flags)
+{
+    m_flags = flags;
+    m_needsNewGeom = true;
+}
+
+void QQuickPathRenderer::endSync()
+{
+    if (m_needsNewGeom) {
+        fill();
+        stroke();
+    }
 }
 
 void QQuickPathRenderer::fill()
@@ -154,17 +174,6 @@ void QQuickPathRenderer::stroke()
     g->setDrawingMode(QSGGeometry::DrawTriangleStrip);
     memcpy(g->vertexData(), m_stroker.vertices(), g->vertexCount() * g->sizeOfVertex());
     n->markDirty(QSGNode::DirtyGeometry);
-}
-
-void QQuickPathRenderer::setFlags(RenderFlags flags)
-{
-    m_flags = flags;
-}
-
-void QQuickPathRenderer::commit()
-{
-    fill();
-    stroke();
 }
 
 QT_END_NAMESPACE

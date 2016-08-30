@@ -64,13 +64,13 @@ public:
     };
     Q_DECLARE_FLAGS(RenderFlags, RenderFlag)
 
+    virtual void beginSync() = 0;
     virtual void setPath(const QPainterPath &path) = 0;
-    virtual void setFillMaterial(const QColor &color) = 0;
-    virtual void setStrokeMaterial(const QColor &color) = 0;
+    virtual void setFillColor(const QColor &color) = 0;
+    virtual void setStrokeColor(const QColor &color) = 0;
     virtual void setStrokeWidth(qreal w) = 0;
     virtual void setFlags(RenderFlags flags) = 0;
-
-    virtual void commit() = 0;
+    virtual void endSync() = 0;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QQuickAbstractPathRenderer::RenderFlags)

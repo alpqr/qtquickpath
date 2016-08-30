@@ -168,16 +168,20 @@ bool QNvprRenderNode::isSupported()
     return QNvPathRendering::isSupported();
 }
 
+void QNvprPathRenderer::beginSync()
+{
+}
+
 void QNvprPathRenderer::setPath(const QPainterPath &path)
 {
     // ###
 }
 
-void QNvprPathRenderer::setFillMaterial(const QColor &color)
+void QNvprPathRenderer::setFillColor(const QColor &color)
 {
 }
 
-void QNvprPathRenderer::setStrokeMaterial(const QColor &color)
+void QNvprPathRenderer::setStrokeColor(const QColor &color)
 {
 }
 
@@ -189,7 +193,7 @@ void QNvprPathRenderer::setFlags(RenderFlags flags)
 {
 }
 
-void QNvprPathRenderer::commit()
+void QNvprPathRenderer::endSync()
 {
 }
 

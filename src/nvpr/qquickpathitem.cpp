@@ -116,23 +116,21 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
         d->dirty |= 0xFFFF;
     }
 
-    const bool wasDirty = d->dirty != 0;
+    d->renderer->beginSync();
 
     if (d->dirty & QQuickPathItemPrivate::DirtyPath)
         d->renderer->setPath(d->path);
     if (d->dirty & QQuickPathItemPrivate::DirtyFillMaterial)
-        d->renderer->setFillMaterial(d->fillColor);
+        d->renderer->setFillColor(d->fillColor);
     if (d->dirty & QQuickPathItemPrivate::DirtyStrokeMaterial)
-        d->renderer->setStrokeMaterial(d->strokeColor);
+        d->renderer->setStrokeColor(d->strokeColor);
     if (d->dirty & QQuickPathItemPrivate::DirtyStrokeWidth)
         d->renderer->setStrokeWidth(d->strokeWidth);
     if (d->dirty & QQuickPathItemPrivate::DirtyFlags)
         d->renderer->setFlags(d->flags);
 
+    d->renderer->endSync();
     d->dirty = 0;
-
-    if (wasDirty)
-        d->renderer->commit();
 
     return node;
 }
