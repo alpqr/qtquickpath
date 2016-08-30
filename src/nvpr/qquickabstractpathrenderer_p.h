@@ -72,6 +72,7 @@ public:
     virtual void setFlags(RenderFlags flags) = 0;
     virtual void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) = 0;
     virtual void setCapStyle(QQuickPathItem::CapStyle capStyle) = 0;
+    virtual void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle) = 0;
     virtual void endSync() = 0;
 };
 

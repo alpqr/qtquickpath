@@ -54,7 +54,8 @@ public:
           flags(0),
           joinStyle(QQuickPathItem::BevelJoin),
           miterLimit(2),
-          capStyle(QQuickPathItem::SquareCap)
+          capStyle(QQuickPathItem::SquareCap),
+          strokeStyle(QQuickPathItem::SolidLine)
     { }
     ~QQuickPathItemPrivate() { delete renderer; }
 
@@ -77,6 +78,7 @@ public:
     QQuickPathItem::JoinStyle joinStyle;
     int miterLimit;
     QQuickPathItem::CapStyle capStyle;
+    QQuickPathItem::StrokeStyle strokeStyle;
 };
 
 QQuickPathItem::QQuickPathItem(QQuickItem *parent)
@@ -138,6 +140,7 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
     if (d->dirty & QQuickPathItemPrivate::DirtyStyle) {
         d->renderer->setJoinStyle(d->joinStyle, d->miterLimit);
         d->renderer->setCapStyle(d->capStyle);
+        d->renderer->setStrokeStyle(d->strokeStyle);
     }
 
     d->renderer->endSync();
@@ -365,6 +368,21 @@ void QQuickPathItem::setCapStyle(CapStyle style)
         d->capStyle = style;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit capStyleChanged();
+        update();
+    }
+}
+
+QQuickPathItem::StrokeStyle QQuickPathItem::strokeStyle() const
+{
+    return d->strokeStyle;
+}
+
+void QQuickPathItem::setStrokeStyle(StrokeStyle style)
+{
+    if (d->strokeStyle != style) {
+        d->strokeStyle = style;
+        d->dirty |= QQuickPathItemPrivate::DirtyStyle;
+        emit strokeStyleChanged();
         update();
     }
 }

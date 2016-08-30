@@ -71,6 +71,7 @@ public:
     void setFlags(RenderFlags flags) override;
     void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) override;
     void setCapStyle(QQuickPathItem::CapStyle capStyle) override;
+    void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle) override;
     void endSync() override;
 
 private:
@@ -82,6 +83,7 @@ private:
     QVector<QSGGeometry::Point2D> m_vertices;
     QVector<quint16> m_indices;
     QTriangulatingStroker m_stroker;
+    QDashedStrokeProcessor m_dashStroker;
     RenderFlags m_flags;
     bool m_needsNewGeom;
     QPen m_pen;

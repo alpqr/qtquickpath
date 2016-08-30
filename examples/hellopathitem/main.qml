@@ -83,6 +83,7 @@ Item {
             fillMaterial: "green"
             strokeMaterial: "white"
             strokeWidth: 4
+            strokeStyle: PathItem.DashLine
         }
 
         // pie

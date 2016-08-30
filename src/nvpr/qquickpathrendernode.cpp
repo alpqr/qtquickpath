@@ -118,6 +118,12 @@ void QQuickPathRenderer::setCapStyle(QQuickPathItem::CapStyle capStyle)
     m_needsNewGeom = true;
 }
 
+void QQuickPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle)
+{
+    m_pen.setStyle(Qt::PenStyle(strokeStyle));
+    m_needsNewGeom = true;
+}
+
 void QQuickPathRenderer::endSync()
 {
     if (m_needsNewGeom) {
@@ -129,10 +135,11 @@ void QQuickPathRenderer::endSync()
 void QQuickPathRenderer::fill()
 {
     QQuickPathRenderNode *n = m_rootNode->m_fillNode;
+    n->markDirty(QSGNode::DirtyGeometry);
+
     QSGGeometry *g = &n->m_geometry;
     if (m_flags.testFlag(RenderNoFill) || m_path.isEmpty()) {
         g->allocate(0, 0);
-        n->markDirty(QSGNode::DirtyGeometry);
         return;
     }
 
@@ -159,32 +166,41 @@ void QQuickPathRenderer::fill()
     g->setDrawingMode(QSGGeometry::DrawTriangles);
     memcpy(g->vertexData(), m_vertices.constData(), g->vertexCount() * g->sizeOfVertex());
     memcpy(g->indexData(), m_indices.constData(), g->indexCount() * g->sizeOfIndex());
-    n->markDirty(QSGNode::DirtyGeometry);
 }
 
 void QQuickPathRenderer::stroke()
 {
     QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
+    n->markDirty(QSGNode::DirtyGeometry);
+
     QSGGeometry *g = &n->m_geometry;
     if (m_path.isEmpty() || qFuzzyIsNull(m_pen.widthF())) {
         g->allocate(0, 0);
-        n->markDirty(QSGNode::DirtyGeometry);
         return;
     }
 
     const QVectorPath &vp = qtVectorPathForPath(m_path);
 
     const QRectF clip(0, 0, m_rootNode->m_item->width(), m_rootNode->m_item->height());
-    const qreal inverseScale = 1 / SCALE;
+    const qreal inverseScale = 1.0 / SCALE;
     m_stroker.setInvScale(inverseScale);
-    m_stroker.process(vp, m_pen, clip, 0);
-    if (!m_stroker.vertexCount())
+    if (m_pen.style() == Qt::SolidLine) {
+        m_stroker.process(vp, m_pen, clip, 0);
+    } else {
+        m_dashStroker.setInvScale(inverseScale);
+        m_dashStroker.process(vp, m_pen, clip, 0);
+        QVectorPath dashStroke(m_dashStroker.points(), m_dashStroker.elementCount(),
+                               m_dashStroker.elementTypes(), 0);
+        m_stroker.process(dashStroke, m_pen, clip, 0);
+    }
+    if (!m_stroker.vertexCount()) {
+        g->allocate(0, 0);
         return;
+    }
 
     g->allocate(m_stroker.vertexCount() / 2, 0);
     g->setDrawingMode(QSGGeometry::DrawTriangleStrip);
     memcpy(g->vertexData(), m_stroker.vertices(), g->vertexCount() * g->sizeOfVertex());
-    n->markDirty(QSGNode::DirtyGeometry);
 }
 
 QT_END_NAMESPACE

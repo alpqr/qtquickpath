@@ -201,6 +201,10 @@ void QNvprPathRenderer::setCapStyle(QQuickPathItem::CapStyle capStyle)
 {
 }
 
+void QNvprPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle)
+{
+}
+
 void QNvprPathRenderer::endSync()
 {
 }

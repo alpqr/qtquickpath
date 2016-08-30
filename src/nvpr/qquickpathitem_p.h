@@ -66,6 +66,7 @@ class QNVPR_EXPORT QQuickPathItem : public QQuickItem
     Q_PROPERTY(JoinStyle joinStyle READ joinStyle WRITE setJoinStyle NOTIFY joinStyleChanged)
     Q_PROPERTY(int miterLimit READ miterLimit WRITE setMiterLimit NOTIFY miterLimitChanged)
     Q_PROPERTY(CapStyle capStyle READ capStyle WRITE setCapStyle NOTIFY capStyleChanged)
+    Q_PROPERTY(StrokeStyle strokeStyle READ strokeStyle WRITE setStrokeStyle NOTIFY strokeStyleChanged)
 
 public:
     enum FillRule {
@@ -87,6 +88,12 @@ public:
         RoundCap = Qt::RoundCap
     };
     Q_ENUM(CapStyle)
+
+    enum StrokeStyle {
+        SolidLine = Qt::SolidLine,
+        DashLine = Qt::DashLine
+    };
+    Q_ENUM(StrokeStyle)
 
     QQuickPathItem(QQuickItem *parent = nullptr);
     ~QQuickPathItem();
@@ -135,6 +142,9 @@ public:
     CapStyle capStyle() const;
     void setCapStyle(CapStyle style);
 
+    StrokeStyle strokeStyle() const;
+    void setStrokeStyle(StrokeStyle style);
+
 protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
 
@@ -147,6 +157,7 @@ signals:
     void joinStyleChanged();
     void miterLimitChanged();
     void capStyleChanged();
+    void strokeStyleChanged();
 
 private:
     QQuickPathItemPrivate *d;
