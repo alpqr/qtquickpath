@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the QtNVPR module
+** This file is part of the QtQuickPath module
 **
 ** $QT_BEGIN_LICENSE:LGPL3$
 ** Commercial License Usage
@@ -89,7 +89,7 @@ bool QNvPathRendering::isSupported()
     // drivers, yet the functions we need are resolvable.
 #if 0
     if (!ctx->hasExtension(QByteArrayLiteral("GL_EXT_direct_state_access"))) {
-        qWarning("QtNVPR: GL_EXT_direct_state_access not supported");
+        qWarning("QtQuickPath/NVPR: GL_EXT_direct_state_access not supported");
         return false;
     }
 #endif

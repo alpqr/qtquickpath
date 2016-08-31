@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the QtNVPR module
+** This file is part of the QtQuickPath module
 **
 ** $QT_BEGIN_LICENSE:LGPL3$
 ** Commercial License Usage
@@ -34,28 +34,34 @@
 **
 ****************************************************************************/
 
-#include "qquickpathrendermaterial_p.h"
-#include <QQuickWindow>
-#include <QSGVertexColorMaterial>
+#ifndef QNVPR_P_H
+#define QNVPR_P_H
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include "qnvpr.h"
 
 QT_BEGIN_NAMESPACE
 
-QSGMaterial *QQuickPathRenderMaterialFactory::create(QQuickWindow *window)
+class QNvPathRenderingPrivate
 {
-    QSGRendererInterface *rif = window->rendererInterface();
-    QSGRendererInterface::GraphicsApi api = rif->graphicsApi();
+public:
+    QNvPathRenderingPrivate(QNvPathRendering *q_ptr) : q(q_ptr) { }
 
-#ifndef QT_NO_OPENGL
-    if (api == QSGRendererInterface::OpenGL)
-        return new QSGVertexColorMaterial;
-#endif
+    bool resolve();
 
-    if (api == QSGRendererInterface::Direct3D12) {
-        // ###
-    }
-
-    qWarning("Unsupported api %d", api);
-    return nullptr;
-}
+    QNvPathRendering *q;
+};
 
 QT_END_NAMESPACE
+
+#endif // QNVPR_P_H

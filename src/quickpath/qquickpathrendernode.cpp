@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the QtNVPR module
+** This file is part of the QtQuickPath module
 **
 ** $QT_BEGIN_LICENSE:LGPL3$
 ** Commercial License Usage
@@ -94,7 +94,7 @@ QQuickPathRenderNode::QQuickPathRenderNode(QQuickPathItem *item)
 
     // Use vertexcolor material. Items with different colors remain batchable
     // this way, at the expense of having to provide per-vertex color values.
-    m_material.reset(QQuickPathRenderMaterialFactory::create(item->window()));
+    m_material.reset(QQuickPathRenderMaterialFactory::createVertexColor(item->window()));
     setMaterial(m_material.data());
 }
 

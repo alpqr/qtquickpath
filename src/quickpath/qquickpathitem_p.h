@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the QtNVPR module
+** This file is part of the QtQuickPath module
 **
 ** $QT_BEGIN_LICENSE:LGPL3$
 ** Commercial License Usage
@@ -48,14 +48,14 @@
 // We mean it.
 //
 
-#include <QtNVPR/qtnvprglobal.h>
+#include <QtQuickPath/qtquickpathglobal.h>
 #include <QQuickItem>
 
 QT_BEGIN_NAMESPACE
 
 class QQuickPathItemPrivate;
 
-class QNVPR_EXPORT QQuickPathItem : public QQuickItem
+class QQUICKPATH_EXPORT QQuickPathItem : public QQuickItem
 {
     Q_OBJECT
     Q_PROPERTY(bool fillEnabled READ fillEnabled WRITE setFillEnabled NOTIFY fillEnabledChanged)

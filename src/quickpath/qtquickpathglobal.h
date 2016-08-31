@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the QtNVPR module
+** This file is part of the QtQuickPath module
 **
 ** $QT_BEGIN_LICENSE:LGPL3$
 ** Commercial License Usage
@@ -34,34 +34,19 @@
 **
 ****************************************************************************/
 
-#ifndef QNVPR_P_H
-#define QNVPR_P_H
+#ifndef QTQUICKPATHGLOBAL_H
+#define QTQUICKPATHGLOBAL_H
 
-//
-//  W A R N I N G
-//  -------------
-//
-// This file is not part of the Qt API.  It exists for the convenience
-// of a number of Qt sources files.  This header file may change from
-// version to version without notice, or even be removed.
-//
-// We mean it.
-//
-
-#include "qnvpr.h"
+#include <qglobal.h>
 
 QT_BEGIN_NAMESPACE
 
-class QNvPathRenderingPrivate
-{
-public:
-    QNvPathRenderingPrivate(QNvPathRendering *q_ptr) : q(q_ptr) { }
-
-    bool resolve();
-
-    QNvPathRendering *q;
-};
+#if defined(QTQUICKPATH_BUILD_DLL)
+#define QQUICKPATH_EXPORT Q_DECL_EXPORT
+#else
+#define QQUICKPATH_EXPORT Q_DECL_IMPORT
+#endif
 
 QT_END_NAMESPACE
 
-#endif // QNVPR_P_H
+#endif // QTQUICKPATHGLOBAL_H

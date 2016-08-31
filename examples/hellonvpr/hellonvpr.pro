@@ -1,5 +1,5 @@
 TEMPLATE = app
-QT += nvpr
+QT += quickpath
 
 SOURCES = main.cpp window.cpp
 HEADERS = window.h

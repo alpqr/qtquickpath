@@ -1,5 +1,5 @@
 TEMPLATE = app
-QT += quick nvpr
+QT += quick quickpath
 
 SOURCES = main.cpp
 RESOURCES = hellopathitem.qrc

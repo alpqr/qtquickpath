@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the QtNVPR module
+** This file is part of the QtQuickPath module
 **
 ** $QT_BEGIN_LICENSE:LGPL3$
 ** Commercial License Usage
@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QQUICKABSTRACTPATHRENDERER_P_H
-#define QQUICKABSTRACTPATHRENDERER_P_H
+#ifndef QNVPRRENDERNODE_P_H
+#define QNVPRRENDERNODE_P_H
 
 //
 //  W A R N I N G
@@ -48,36 +48,61 @@
 // We mean it.
 //
 
-#include "qquickpathitem_p.h"
-#include <QPainterPath>
-#include <QColor>
+#include "qquickabstractpathrenderer_p.h"
+#include <qsgrendernode.h>
+#include "qnvpr.h"
+
+#ifndef QT_NO_OPENGL
 
 QT_BEGIN_NAMESPACE
 
-class QQuickAbstractPathRenderer
+class QQuickPathItem;
+class QNvprRenderNode;
+
+class QNvprPathRenderer : public QQuickAbstractPathRenderer
 {
 public:
-    virtual ~QQuickAbstractPathRenderer() { }
+    QNvprPathRenderer(QNvprRenderNode *rn) : m_node(rn) { }
 
-    enum RenderFlag {
-        RenderNoFill = 0x01
-    };
-    Q_DECLARE_FLAGS(RenderFlags, RenderFlag)
+    void beginSync() override;
+    void setPath(const QPainterPath &path) override;
+    void setFillColor(const QColor &color) override;
+    void setStrokeColor(const QColor &color) override;
+    void setStrokeWidth(qreal w) override;
+    void setFlags(RenderFlags flags) override;
+    void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) override;
+    void setCapStyle(QQuickPathItem::CapStyle capStyle) override;
+    void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle) override;
+    void endSync() override;
 
-    virtual void beginSync() = 0;
-    virtual void setPath(const QPainterPath &path) = 0;
-    virtual void setFillColor(const QColor &color) = 0;
-    virtual void setStrokeColor(const QColor &color) = 0;
-    virtual void setStrokeWidth(qreal w) = 0;
-    virtual void setFlags(RenderFlags flags) = 0;
-    virtual void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) = 0;
-    virtual void setCapStyle(QQuickPathItem::CapStyle capStyle) = 0;
-    virtual void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle) = 0;
-    virtual void endSync() = 0;
+private:
+    QNvprRenderNode *m_node;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(QQuickAbstractPathRenderer::RenderFlags)
+class QNvprRenderNode : public QSGRenderNode
+{
+public:
+    QNvprRenderNode(QQuickPathItem *item);
+    ~QNvprRenderNode();
+
+    void render(const RenderState *state) override;
+    void releaseResources() override;
+    StateFlags changedStates() const override;
+    RenderingFlags flags() const override;
+    QRectF rect() const override;
+
+    static bool isSupported();
+
+private:
+    QQuickPathItem *m_item;
+    QNvPathRendering m_nvpr;
+    GLuint m_pp = 0;
+    GLuint m_fs = 0;
+    int m_colorLoc;
+};
 
 QT_END_NAMESPACE
+
+#endif // QT_NO_OPENGL
 
 #endif

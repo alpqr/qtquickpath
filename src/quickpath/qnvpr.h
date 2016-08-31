@@ -3,7 +3,7 @@
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the QtNVPR module
+** This file is part of the QtQuickPath module
 **
 ** $QT_BEGIN_LICENSE:LGPL3$
 ** Commercial License Usage
@@ -39,7 +39,7 @@
 
 #include <qopengl.h>
 #include <QtGui/qsurfaceformat.h>
-#include <QtNVPR/qtnvprglobal.h>
+#include <QtQuickPath/qtquickpathglobal.h>
 
 #ifndef QT_NO_OPENGL
 
@@ -283,7 +283,7 @@ typedef void (QOPENGLF_APIENTRYP PFNGLMATRIXLOADIDENTITYEXTPROC) (GLenum mode);
 
 class QNvPathRenderingPrivate;
 
-class QNVPR_EXPORT QNvPathRendering
+class QQUICKPATH_EXPORT QNvPathRendering
 {
 public:
     QNvPathRendering();

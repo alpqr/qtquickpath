@@ -1,5 +1,5 @@
 %modules = (
-    "QtNVPR" => "$basedir/src/nvpr",
+    "QtQuickPath" => "$basedir/src/quickpath",
 );
 %dependencies = (
     "qtbase" => "refs/heads/stable",
