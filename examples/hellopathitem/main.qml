@@ -182,6 +182,24 @@ Item {
         }
     }
 
+    LineItem {
+        anchors.bottom: parent.bottom
+        anchors.margins: 50
+        width: 100
+        height: 100
+        x1: 10
+        y1: 10
+        x2: 90
+        NumberAnimation on y2 {
+            from: 10
+            to: 90
+            duration: 2000
+            loops: Animation.Infinite
+        }
+        color: "green"
+        lineWidth: 5
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: { path.ex = path.ex + 1; r.visible = !r.visible; star.fillEnabled = !star.fillEnabled }

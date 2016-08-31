@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QQUICKPATHRENDERNODE_P_H
-#define QQUICKPATHRENDERNODE_P_H
+#ifndef QQUICKLINEITEM_P_H
+#define QQUICKLINEITEM_P_H
 
 //
 //  W A R N I N G
@@ -48,75 +48,58 @@
 // We mean it.
 //
 
-#include "qquickabstractpathrenderer_p.h"
-#include <qsgnode.h>
-#include <qsggeometry.h>
-#include <QtGui/private/qtriangulatingstroker_p.h>
+#include <QtQuickPath/qtquickpathglobal.h>
+#include <QQuickItem>
 
 QT_BEGIN_NAMESPACE
 
-class QQuickPathItem;
-class QQuickPathRootRenderNode;
+class QQuickPathItemPrivate;
 
-class QQuickPathRenderer : public QQuickAbstractPathRenderer
+class QQUICKPATH_EXPORT QQuickLineItem : public QQuickItem
 {
+    Q_OBJECT
+    Q_PROPERTY(qreal x1 READ x1 WRITE setX1 NOTIFY x1Changed)
+    Q_PROPERTY(qreal y1 READ y1 WRITE setY1 NOTIFY y1Changed)
+    Q_PROPERTY(qreal x2 READ x2 WRITE setX2 NOTIFY x2Changed)
+    Q_PROPERTY(qreal y2 READ y2 WRITE setY2 NOTIFY y2Changed)
+    Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
+    Q_PROPERTY(qreal lineWidth READ lineWidth WRITE setLineWidth NOTIFY lineWidthChanged)
+
 public:
-    QQuickPathRenderer(QQuickPathRootRenderNode *rn) : m_rootNode(rn) { }
+    QQuickLineItem(QQuickItem *parent = nullptr);
+    ~QQuickLineItem();
 
-    void beginSync() override;
-    void setPath(const QPainterPath &path) override;
-    void setFillColor(const QColor &color) override;
-    void setStrokeColor(const QColor &color) override;
-    void setStrokeWidth(qreal w) override;
-    void setFlags(RenderFlags flags) override;
-    void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) override;
-    void setCapStyle(QQuickPathItem::CapStyle capStyle) override;
-    void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle) override;
-    void endSync() override;
+    qreal x1() const;
+    void setX1(qreal v);
+    qreal y1() const;
+    void setY1(qreal v);
+    qreal x2() const;
+    void setX2(qreal v);
+    qreal y2() const;
+    void setY2(qreal v);
 
-    struct Color4ub { unsigned char r, g, b, a; };
+    QColor color() const;
+    void setColor(const QColor &color);
+
+    qreal lineWidth() const;
+    void setLineWidth(qreal w);
+
+protected:
+    QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
+
+signals:
+    void x1Changed();
+    void y1Changed();
+    void x2Changed();
+    void y2Changed();
+    void colorChanged();
+    void lineWidthChanged();
 
 private:
-    void fill();
-    void stroke();
+    void regenerate();
 
-    QQuickPathRootRenderNode *m_rootNode;
-    QPainterPath m_path;
-    QTriangulatingStroker m_stroker;
-    QDashedStrokeProcessor m_dashStroker;
-    RenderFlags m_flags;
-    QPen m_pen;
-    Color4ub m_fillColor;
-    Color4ub m_strokeColor;
-    uint m_needsNewGeom : 1;
-    uint m_needsNewColor : 1;
-};
-
-class QQuickPathRenderNode : public QSGGeometryNode
-{
-public:
-    QQuickPathRenderNode(QQuickItem *item);
-    ~QQuickPathRenderNode();
-
-private:
-    QSGGeometry m_geometry;
-    QScopedPointer<QSGMaterial> m_material;
-
-    friend class QQuickPathRenderer;
-};
-
-class QQuickPathRootRenderNode : public QSGNode
-{
-public:
-    QQuickPathRootRenderNode(QQuickItem *item);
-    ~QQuickPathRootRenderNode();
-
-private:
-    QQuickItem *m_item;
-    QQuickPathRenderNode *m_fillNode;
-    QQuickPathRenderNode *m_strokeNode;
-
-    friend class QQuickPathRenderer;
+    QQuickPathItemPrivate *pd;
+    qreal m_x1, m_y1, m_x2, m_y2;
 };
 
 QT_END_NAMESPACE

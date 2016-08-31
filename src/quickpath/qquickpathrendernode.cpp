@@ -74,7 +74,7 @@ static inline QQuickPathRenderer::Color4ub colorToColor4ub(const QColor &c)
     return color;
 }
 
-QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickPathItem *item)
+QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickItem *item)
     : m_item(item)
 {
     m_fillNode = new QQuickPathRenderNode(item);
@@ -87,7 +87,7 @@ QQuickPathRootRenderNode::~QQuickPathRootRenderNode()
 {
 }
 
-QQuickPathRenderNode::QQuickPathRenderNode(QQuickPathItem *item)
+QQuickPathRenderNode::QQuickPathRenderNode(QQuickItem *item)
     : m_geometry(QSGGeometry::defaultAttributes_ColoredPoint2D(), 0, 0)
 {
     setGeometry(&m_geometry);

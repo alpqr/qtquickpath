@@ -34,52 +34,13 @@
 **
 ****************************************************************************/
 
-#include "qquickpathitem_p.h"
+#include "qquickpathitem_p_p.h"
 #include "qnvprrendernode_p.h"
 #include "qquickpathrendernode_p.h"
 #include <QSGRendererInterface>
 #include <QPainterPath>
 
 QT_BEGIN_NAMESPACE
-
-class QQuickPathItemPrivate
-{
-public:
-    QQuickPathItemPrivate()
-        : renderer(nullptr),
-          dirty(0),
-          strokeWidth(1),
-          strokeColor(Qt::white),
-          fillColor(Qt::white),
-          flags(0),
-          joinStyle(QQuickPathItem::BevelJoin),
-          miterLimit(2),
-          capStyle(QQuickPathItem::SquareCap),
-          strokeStyle(QQuickPathItem::SolidLine)
-    { }
-    ~QQuickPathItemPrivate() { delete renderer; }
-
-    enum Dirty {
-        DirtyPath = 0x01,
-        DirtyFillColor = 0x02,
-        DirtyStrokeColor = 0x04,
-        DirtyStrokeWidth = 0x08,
-        DirtyFlags = 0x10,
-        DirtyStyle = 0x20
-    };
-
-    QPainterPath path;
-    QQuickAbstractPathRenderer *renderer;
-    int dirty;
-    qreal strokeWidth;
-    QColor strokeColor;
-    QColor fillColor;
-    QQuickAbstractPathRenderer::RenderFlags flags;
-    QQuickPathItem::JoinStyle joinStyle;
-    int miterLimit;
-    QQuickPathItem::CapStyle capStyle;
-    QQuickPathItem::StrokeStyle strokeStyle;
-};
 
 QQuickPathItem::QQuickPathItem(QQuickItem *parent)
     : QQuickItem(parent),
@@ -93,28 +54,28 @@ QQuickPathItem::~QQuickPathItem()
     delete d;
 }
 
-QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
+QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
 {
     if (!node) {
-        QSGRendererInterface *ri = window()->rendererInterface();
+        QSGRendererInterface *ri = item->window()->rendererInterface();
         if (!ri)
             return nullptr;
         switch (ri->graphicsApi()) {
 #ifndef QT_NO_OPENGL
             case QSGRendererInterface::OpenGL:
 //                if (QNvprRenderNode::isSupported()) {
-//                    node = new QNvprRenderNode(this);
-//                    d->renderer = new QNvprPathRenderer(static_cast<QNvprRenderNode *>(node));
+//                    node = new QNvprRenderNode(item);
+//                    renderer = new QNvprPathRenderer(static_cast<QNvprRenderNode *>(node));
 //                } else {
-                    node = new QQuickPathRootRenderNode(this);
-                    d->renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
+                    node = new QQuickPathRootRenderNode(item);
+                    renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
 //                }
                 break;
 #endif
 
             case QSGRendererInterface::Direct3D12:
-                node = new QQuickPathRootRenderNode(this);
-                d->renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
+                node = new QQuickPathRootRenderNode(item);
+                renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
                 break;
 
             case QSGRendererInterface::Software:
@@ -122,31 +83,36 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
                 qWarning("No path backend for this graphics API yet");
                 break;
         }
-        d->dirty |= 0xFFFF;
+        dirty |= 0xFFFF;
     }
 
-    d->renderer->beginSync();
+    renderer->beginSync();
 
-    if (d->dirty & QQuickPathItemPrivate::DirtyPath)
-        d->renderer->setPath(d->path);
-    if (d->dirty & QQuickPathItemPrivate::DirtyFillColor)
-        d->renderer->setFillColor(d->fillColor);
-    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeColor)
-        d->renderer->setStrokeColor(d->strokeColor);
-    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeWidth)
-        d->renderer->setStrokeWidth(d->strokeWidth);
-    if (d->dirty & QQuickPathItemPrivate::DirtyFlags)
-        d->renderer->setFlags(d->flags);
-    if (d->dirty & QQuickPathItemPrivate::DirtyStyle) {
-        d->renderer->setJoinStyle(d->joinStyle, d->miterLimit);
-        d->renderer->setCapStyle(d->capStyle);
-        d->renderer->setStrokeStyle(d->strokeStyle);
+    if (dirty & QQuickPathItemPrivate::DirtyPath)
+        renderer->setPath(path);
+    if (dirty & QQuickPathItemPrivate::DirtyFillColor)
+        renderer->setFillColor(fillColor);
+    if (dirty & QQuickPathItemPrivate::DirtyStrokeColor)
+        renderer->setStrokeColor(strokeColor);
+    if (dirty & QQuickPathItemPrivate::DirtyStrokeWidth)
+        renderer->setStrokeWidth(strokeWidth);
+    if (dirty & QQuickPathItemPrivate::DirtyFlags)
+        renderer->setFlags(flags);
+    if (dirty & QQuickPathItemPrivate::DirtyStyle) {
+        renderer->setJoinStyle(joinStyle, miterLimit);
+        renderer->setCapStyle(capStyle);
+        renderer->setStrokeStyle(strokeStyle);
     }
 
-    d->renderer->endSync();
-    d->dirty = 0;
+    renderer->endSync();
+    dirty = 0;
 
     return node;
+}
+
+QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
+{
+    return d->updatePaintNode(this, node);
 }
 
 void QQuickPathItem::clear()
