@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QQUICKPATHRENDERNODE_P_H
-#define QQUICKPATHRENDERNODE_P_H
+#ifndef QQUICKPATHRENDERMATERIAL_P_H
+#define QQUICKPATHRENDERMATERIAL_P_H
 
 //
 //  W A R N I N G
@@ -48,75 +48,15 @@
 // We mean it.
 //
 
-#include "qquickabstractpathrenderer_p.h"
-#include <qsgnode.h>
-#include <qsggeometry.h>
-#include <QtGui/private/qtriangulatingstroker_p.h>
+#include <QtNVPR/qtnvprglobal.h>
+#include <qsgmaterial.h>
 
 QT_BEGIN_NAMESPACE
 
-class QQuickPathItem;
-class QQuickPathRootRenderNode;
-
-class QQuickPathRenderer : public QQuickAbstractPathRenderer
+class QQuickPathRenderMaterialFactory
 {
 public:
-    QQuickPathRenderer(QQuickPathRootRenderNode *rn) : m_rootNode(rn) { }
-
-    void beginSync() override;
-    void setPath(const QPainterPath &path) override;
-    void setFillColor(const QColor &color) override;
-    void setStrokeColor(const QColor &color) override;
-    void setStrokeWidth(qreal w) override;
-    void setFlags(RenderFlags flags) override;
-    void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) override;
-    void setCapStyle(QQuickPathItem::CapStyle capStyle) override;
-    void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle) override;
-    void endSync() override;
-
-    struct Color4ub { unsigned char r, g, b, a; };
-
-private:
-    void fill();
-    void stroke();
-
-    QQuickPathRootRenderNode *m_rootNode;
-    QPainterPath m_path;
-    QTriangulatingStroker m_stroker;
-    QDashedStrokeProcessor m_dashStroker;
-    RenderFlags m_flags;
-    QPen m_pen;
-    Color4ub m_fillColor;
-    Color4ub m_strokeColor;
-    uint m_needsNewGeom : 1;
-    uint m_needsNewColor : 1;
-};
-
-class QQuickPathRenderNode : public QSGGeometryNode
-{
-public:
-    QQuickPathRenderNode(QQuickPathItem *item);
-    ~QQuickPathRenderNode();
-
-private:
-    QSGGeometry m_geometry;
-    QScopedPointer<QSGMaterial> m_material;
-
-    friend class QQuickPathRenderer;
-};
-
-class QQuickPathRootRenderNode : public QSGNode
-{
-public:
-    QQuickPathRootRenderNode(QQuickPathItem *item);
-    ~QQuickPathRootRenderNode();
-
-private:
-    QQuickPathItem *m_item;
-    QQuickPathRenderNode *m_fillNode;
-    QQuickPathRenderNode *m_strokeNode;
-
-    friend class QQuickPathRenderer;
+    static QSGMaterial *create(QQuickWindow *window);
 };
 
 QT_END_NAMESPACE

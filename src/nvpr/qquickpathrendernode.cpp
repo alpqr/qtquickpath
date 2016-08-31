@@ -35,8 +35,8 @@
 ****************************************************************************/
 
 #include "qquickpathrendernode_p.h"
+#include "qquickpathrendermaterial_p.h"
 #include "qquickpathitem_p.h"
-#include <QSGVertexColorMaterial>
 #include <QtGui/private/qtriangulator_p.h>
 
 QT_BEGIN_NAMESPACE
@@ -77,9 +77,9 @@ static inline QQuickPathRenderer::Color4ub colorToColor4ub(const QColor &c)
 QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickPathItem *item)
     : m_item(item)
 {
-    m_fillNode = new QQuickPathRenderNode;
+    m_fillNode = new QQuickPathRenderNode(item);
     appendChildNode(m_fillNode);
-    m_strokeNode = new QQuickPathRenderNode;
+    m_strokeNode = new QQuickPathRenderNode(item);
     appendChildNode(m_strokeNode);
 }
 
@@ -87,14 +87,14 @@ QQuickPathRootRenderNode::~QQuickPathRootRenderNode()
 {
 }
 
-QQuickPathRenderNode::QQuickPathRenderNode()
+QQuickPathRenderNode::QQuickPathRenderNode(QQuickPathItem *item)
     : m_geometry(QSGGeometry::defaultAttributes_ColoredPoint2D(), 0, 0)
 {
     setGeometry(&m_geometry);
 
     // Use vertexcolor material. Items with different colors remain batchable
     // this way, at the expense of having to provide per-vertex color values.
-    m_material.reset(new QSGVertexColorMaterial);
+    m_material.reset(QQuickPathRenderMaterialFactory::create(item->window()));
     setMaterial(m_material.data());
 }
 

@@ -9,6 +9,7 @@ DEFINES += QTNVPR_BUILD_DLL
 SOURCES += $$PWD/qnvpr.cpp \
            $$PWD/qnvprrendernode.cpp \
            $$PWD/qquickpathrendernode.cpp \
+           $$PWD/qquickpathrendermaterial.cpp \
            $$PWD/qquickpathitem.cpp
 
 HEADERS += $$PWD/qnvpr.h \
@@ -17,4 +18,5 @@ HEADERS += $$PWD/qnvpr.h \
            $$PWD/qquickabstractpathrenderer_p.h \
            $$PWD/qnvprrendernode_p.h \
            $$PWD/qquickpathrendernode_p.h \
+           $$PWD/qquickpathrendermaterial_p.h \
            $$PWD/qquickpathitem_p.h
