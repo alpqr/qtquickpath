@@ -74,13 +74,19 @@ static inline QQuickPathRenderer::Color4ub colorToColor4ub(const QColor &c)
     return color;
 }
 
-QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickItem *item)
-    : m_item(item)
+QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickItem *item, bool hasFill, bool hasStroke)
+    : m_item(item),
+      m_fillNode(nullptr),
+      m_strokeNode(nullptr)
 {
-    m_fillNode = new QQuickPathRenderNode(item);
-    appendChildNode(m_fillNode);
-    m_strokeNode = new QQuickPathRenderNode(item);
-    appendChildNode(m_strokeNode);
+    if (hasFill) {
+        m_fillNode = new QQuickPathRenderNode(item);
+        appendChildNode(m_fillNode);
+    }
+    if (hasStroke) {
+        m_strokeNode = new QQuickPathRenderNode(item);
+        appendChildNode(m_strokeNode);
+    }
 }
 
 QQuickPathRootRenderNode::~QQuickPathRootRenderNode()
@@ -130,12 +136,32 @@ void QQuickPathRenderer::setStrokeWidth(qreal w)
 {
     m_pen.setWidthF(w);
     m_needsNewGeom = true;
+
+    if (qFuzzyIsNull(w)) {
+        delete m_rootNode->m_strokeNode;
+        m_rootNode->m_strokeNode = nullptr;
+    } else if (!m_rootNode->m_strokeNode) {
+        m_rootNode->m_strokeNode = new QQuickPathRenderNode(m_rootNode->m_item);
+        m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
+    }
 }
 
 void QQuickPathRenderer::setFlags(RenderFlags flags)
 {
     m_flags = flags;
     m_needsNewGeom = true;
+
+    if (m_flags.testFlag(QQuickAbstractPathRenderer::RenderNoFill)) {
+        delete m_rootNode->m_fillNode;
+        m_rootNode->m_fillNode = nullptr;
+    } else if (!m_rootNode->m_fillNode) {
+        m_rootNode->m_fillNode = new QQuickPathRenderNode(m_rootNode->m_item);
+        if (m_rootNode->m_strokeNode)
+            m_rootNode->removeChildNode(m_rootNode->m_strokeNode);
+        m_rootNode->appendChildNode(m_rootNode->m_fillNode);
+        if (m_rootNode->m_strokeNode)
+            m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
+    }
 }
 
 void QQuickPathRenderer::setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit)
@@ -167,11 +193,14 @@ void QQuickPathRenderer::endSync()
 
 void QQuickPathRenderer::fill()
 {
+    if (!m_rootNode->m_fillNode)
+        return;
+
     QQuickPathRenderNode *n = m_rootNode->m_fillNode;
     n->markDirty(QSGNode::DirtyGeometry);
 
     QSGGeometry *g = &n->m_geometry;
-    if (m_flags.testFlag(RenderNoFill) || m_path.isEmpty()) {
+    if (m_path.isEmpty()) {
         g->allocate(0, 0);
         return;
     }
@@ -213,11 +242,14 @@ void QQuickPathRenderer::fill()
 
 void QQuickPathRenderer::stroke()
 {
+    if (!m_rootNode->m_strokeNode)
+        return;
+
     QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
     n->markDirty(QSGNode::DirtyGeometry);
 
     QSGGeometry *g = &n->m_geometry;
-    if (m_path.isEmpty() || qFuzzyIsNull(m_pen.widthF())) {
+    if (m_path.isEmpty()) {
         g->allocate(0, 0);
         return;
     }

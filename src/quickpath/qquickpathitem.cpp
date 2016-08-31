@@ -60,6 +60,8 @@ QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
         QSGRendererInterface *ri = item->window()->rendererInterface();
         if (!ri)
             return nullptr;
+        const bool hasFill = !flags.testFlag(QQuickAbstractPathRenderer::RenderNoFill);
+        const bool hasStroke = !qFuzzyIsNull(strokeWidth);
         switch (ri->graphicsApi()) {
 #ifndef QT_NO_OPENGL
             case QSGRendererInterface::OpenGL:
@@ -67,14 +69,14 @@ QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
 //                    node = new QNvprRenderNode(item);
 //                    renderer = new QNvprPathRenderer(static_cast<QNvprRenderNode *>(node));
 //                } else {
-                    node = new QQuickPathRootRenderNode(item);
+                    node = new QQuickPathRootRenderNode(item, hasFill, hasStroke);
                     renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
 //                }
                 break;
 #endif
 
             case QSGRendererInterface::Direct3D12:
-                node = new QQuickPathRootRenderNode(item);
+                node = new QQuickPathRootRenderNode(item, hasFill, hasStroke);
                 renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
                 break;
 

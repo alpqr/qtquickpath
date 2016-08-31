@@ -48,6 +48,7 @@ QQuickLineItem::QQuickLineItem(QQuickItem *parent)
       m_y2(0)
 {
     setFlag(ItemHasContents);
+    pd->flags |= QQuickAbstractPathRenderer::RenderNoFill;
 }
 
 QQuickLineItem::~QQuickLineItem()

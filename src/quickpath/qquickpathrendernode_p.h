@@ -108,7 +108,7 @@ private:
 class QQuickPathRootRenderNode : public QSGNode
 {
 public:
-    QQuickPathRootRenderNode(QQuickItem *item);
+    QQuickPathRootRenderNode(QQuickItem *item, bool hasFill, bool hasStroke);
     ~QQuickPathRootRenderNode();
 
 private:
