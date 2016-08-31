@@ -118,6 +118,7 @@ Item {
             strokeColor: "blue"
             fillColor: "lightGray"
             strokeWidth: 2
+            strokeStyle: PathItem.DotLine
             function draw() {
                 moveTo(20, 30);
                 cubicTo(80, 0, 50, 50, 80, 80);

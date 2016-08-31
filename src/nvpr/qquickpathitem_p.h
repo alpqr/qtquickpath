@@ -91,7 +91,8 @@ public:
 
     enum StrokeStyle {
         SolidLine = Qt::SolidLine,
-        DashLine = Qt::DashLine
+        DashLine = Qt::DashLine,
+        DotLine = Qt::DotLine
     };
     Q_ENUM(StrokeStyle)
 
