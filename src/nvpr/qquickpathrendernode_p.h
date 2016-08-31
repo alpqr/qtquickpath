@@ -74,19 +74,22 @@ public:
     void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle) override;
     void endSync() override;
 
+    struct Color4ub { unsigned char r, g, b, a; };
+
 private:
     void fill();
     void stroke();
 
     QQuickPathRootRenderNode *m_rootNode;
     QPainterPath m_path;
-    QVector<QSGGeometry::Point2D> m_vertices;
-    QVector<quint16> m_indices;
     QTriangulatingStroker m_stroker;
     QDashedStrokeProcessor m_dashStroker;
     RenderFlags m_flags;
-    bool m_needsNewGeom;
     QPen m_pen;
+    Color4ub m_fillColor;
+    Color4ub m_strokeColor;
+    uint m_needsNewGeom : 1;
+    uint m_needsNewColor : 1;
 };
 
 class QQuickPathRenderNode : public QSGGeometryNode

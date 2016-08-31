@@ -36,12 +36,43 @@
 
 #include "qquickpathrendernode_p.h"
 #include "qquickpathitem_p.h"
-#include <QSGFlatColorMaterial>
+#include <QSGVertexColorMaterial>
 #include <QtGui/private/qtriangulator_p.h>
 
 QT_BEGIN_NAMESPACE
 
 static const qreal SCALE = 100;
+
+struct ColoredVertex // must match QSGGeometry::ColoredPoint2D
+{
+    float x, y;
+    QQuickPathRenderer::Color4ub color;
+    void set(float nx, float ny, QQuickPathRenderer::Color4ub ncolor)
+    {
+        x = nx; y = ny; color = ncolor;
+    }
+};
+
+static inline QQuickPathRenderer::Color4ub operator *(QQuickPathRenderer::Color4ub c, float t)
+{
+    c.a *= t; c.r *= t; c.g *= t; c.b *= t; return c;
+}
+
+static inline QQuickPathRenderer::Color4ub operator +(QQuickPathRenderer::Color4ub a, QQuickPathRenderer::Color4ub b)
+{
+    a.a += b.a; a.r += b.r; a.g += b.g; a.b += b.b; return a;
+}
+
+static inline QQuickPathRenderer::Color4ub colorToColor4ub(const QColor &c)
+{
+    QQuickPathRenderer::Color4ub color = {
+        uchar(qRound(c.redF() * c.alphaF() * 255)),
+        uchar(qRound(c.greenF() * c.alphaF() * 255)),
+        uchar(qRound(c.blueF() * c.alphaF() * 255)),
+        uchar(qRound(c.alphaF() * 255))
+    };
+    return color;
+}
 
 QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickPathItem *item)
     : m_item(item)
@@ -57,10 +88,13 @@ QQuickPathRootRenderNode::~QQuickPathRootRenderNode()
 }
 
 QQuickPathRenderNode::QQuickPathRenderNode()
-    : m_geometry(QSGGeometry::defaultAttributes_Point2D(), 0, 0)
+    : m_geometry(QSGGeometry::defaultAttributes_ColoredPoint2D(), 0, 0)
 {
     setGeometry(&m_geometry);
-    m_material.reset(new QSGFlatColorMaterial);
+
+    // Use vertexcolor material. Items with different colors remain batchable
+    // this way, at the expense of having to provide per-vertex color values.
+    m_material.reset(new QSGVertexColorMaterial);
     setMaterial(m_material.data());
 }
 
@@ -71,6 +105,7 @@ QQuickPathRenderNode::~QQuickPathRenderNode()
 void QQuickPathRenderer::beginSync()
 {
     m_needsNewGeom = false;
+    m_needsNewColor = false;
 }
 
 void QQuickPathRenderer::setPath(const QPainterPath &path)
@@ -81,16 +116,14 @@ void QQuickPathRenderer::setPath(const QPainterPath &path)
 
 void QQuickPathRenderer::setFillColor(const QColor &color)
 {
-    QQuickPathRenderNode *n = m_rootNode->m_fillNode;
-    static_cast<QSGFlatColorMaterial *>(n->m_material.data())->setColor(color);
-    n->markDirty(QSGNode::DirtyMaterial);
+    m_fillColor = colorToColor4ub(color);
+    m_needsNewColor = true;
 }
 
 void QQuickPathRenderer::setStrokeColor(const QColor &color)
 {
-    QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
-    static_cast<QSGFlatColorMaterial *>(n->m_material.data())->setColor(color);
-    n->markDirty(QSGNode::DirtyMaterial);
+    m_strokeColor = colorToColor4ub(color);
+    m_needsNewColor = true;
 }
 
 void QQuickPathRenderer::setStrokeWidth(qreal w)
@@ -126,7 +159,7 @@ void QQuickPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle)
 
 void QQuickPathRenderer::endSync()
 {
-    if (m_needsNewGeom) {
+    if (m_needsNewGeom || m_needsNewColor) {
         fill();
         stroke();
     }
@@ -143,29 +176,39 @@ void QQuickPathRenderer::fill()
         return;
     }
 
+    if (m_needsNewColor && !m_needsNewGeom) {
+        ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(g->vertexData());
+        for (int i = 0; i < g->vertexCount(); ++i)
+            vdst[i].set(vdst[i].x, vdst[i].y, m_fillColor);
+        return;
+    }
+
     const QVectorPath &vp = qtVectorPathForPath(m_path);
+    QVarLengthArray<QSGGeometry::ColoredPoint2D> vertices;
+    QVarLengthArray<quint16> indices;
 
     QTriangleSet ts = qTriangulate(vp, QTransform::fromScale(SCALE, SCALE));
-    m_vertices.resize(ts.vertices.count() / 2);
-    QSGGeometry::Point2D *vdst = m_vertices.data();
-    const qreal *vdata = ts.vertices.constData();
-    for (int i = 0; i < ts.vertices.count() / 2; ++i)
-        vdst[i].set(vdata[i * 2] / SCALE, vdata[i * 2 + 1] / SCALE);
+    const int vertexCount = ts.vertices.count() / 2; // just a qreal vector with x,y hence the / 2
+    vertices.resize(vertexCount);
+    ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(vertices.data());
+    const qreal *vsrc = ts.vertices.constData();
+    for (int i = 0; i < vertexCount; ++i)
+        vdst[i].set(vsrc[i * 2] / SCALE, vsrc[i * 2 + 1] / SCALE, m_fillColor);
 
-    m_indices.resize(ts.indices.size());
-    quint16 *idst = m_indices.data();
+    indices.resize(ts.indices.size());
+    quint16 *idst = indices.data();
     if (ts.indices.type() == QVertexIndexVector::UnsignedShort) {
-        memcpy(idst, ts.indices.data(), m_indices.count() * sizeof(quint16));
+        memcpy(idst, ts.indices.data(), indices.count() * sizeof(quint16));
     } else {
         const quint32 *isrc = (const quint32 *) ts.indices.data();
-        for (int i = 0; i < m_indices.count(); ++i)
+        for (int i = 0; i < indices.count(); ++i)
             idst[i] = isrc[i];
     }
 
-    g->allocate(m_vertices.count(), m_indices.count());
+    g->allocate(vertexCount, indices.count());
     g->setDrawingMode(QSGGeometry::DrawTriangles);
-    memcpy(g->vertexData(), m_vertices.constData(), g->vertexCount() * g->sizeOfVertex());
-    memcpy(g->indexData(), m_indices.constData(), g->indexCount() * g->sizeOfIndex());
+    memcpy(g->vertexData(), vertices.constData(), g->vertexCount() * g->sizeOfVertex());
+    memcpy(g->indexData(), indices.constData(), g->indexCount() * g->sizeOfIndex());
 }
 
 void QQuickPathRenderer::stroke()
@@ -179,7 +222,15 @@ void QQuickPathRenderer::stroke()
         return;
     }
 
+    if (m_needsNewColor && !m_needsNewGeom) {
+        ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(g->vertexData());
+        for (int i = 0; i < g->vertexCount(); ++i)
+            vdst[i].set(vdst[i].x, vdst[i].y, m_strokeColor);
+        return;
+    }
+
     const QVectorPath &vp = qtVectorPathForPath(m_path);
+    QVarLengthArray<QSGGeometry::ColoredPoint2D> vertices;
 
     const QRectF clip(0, 0, m_rootNode->m_item->width(), m_rootNode->m_item->height());
     const qreal inverseScale = 1.0 / SCALE;
@@ -198,9 +249,16 @@ void QQuickPathRenderer::stroke()
         return;
     }
 
-    g->allocate(m_stroker.vertexCount() / 2, 0);
+    const int vertexCount = m_stroker.vertexCount() / 2; // just a float vector with x,y hence the / 2
+    vertices.resize(vertexCount);
+    ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(vertices.data());
+    const float *vsrc = m_stroker.vertices();
+    for (int i = 0; i < vertexCount; ++i)
+        vdst[i].set(vsrc[i * 2], vsrc[i * 2 + 1], m_strokeColor);
+
+    g->allocate(vertexCount, 0);
     g->setDrawingMode(QSGGeometry::DrawTriangleStrip);
-    memcpy(g->vertexData(), m_stroker.vertices(), g->vertexCount() * g->sizeOfVertex());
+    memcpy(g->vertexData(), vertices.constData(), g->vertexCount() * g->sizeOfVertex());
 }
 
 QT_END_NAMESPACE
