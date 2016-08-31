@@ -61,8 +61,8 @@ public:
 
     enum Dirty {
         DirtyPath = 0x01,
-        DirtyFillMaterial = 0x02,
-        DirtyStrokeMaterial = 0x04,
+        DirtyFillColor = 0x02,
+        DirtyStrokeColor = 0x04,
         DirtyStrokeWidth = 0x08,
         DirtyFlags = 0x10,
         DirtyStyle = 0x20
@@ -129,9 +129,9 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
 
     if (d->dirty & QQuickPathItemPrivate::DirtyPath)
         d->renderer->setPath(d->path);
-    if (d->dirty & QQuickPathItemPrivate::DirtyFillMaterial)
+    if (d->dirty & QQuickPathItemPrivate::DirtyFillColor)
         d->renderer->setFillColor(d->fillColor);
-    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeMaterial)
+    if (d->dirty & QQuickPathItemPrivate::DirtyStrokeColor)
         d->renderer->setStrokeColor(d->strokeColor);
     if (d->dirty & QQuickPathItemPrivate::DirtyStrokeWidth)
         d->renderer->setStrokeWidth(d->strokeWidth);
@@ -271,43 +271,32 @@ void QQuickPathItem::setFillRule(FillRule fillRule)
     }
 }
 
-QVariant QQuickPathItem::fillMaterial() const
+QColor QQuickPathItem::fillColor() const
 {
     return d->fillColor;
 }
 
-void QQuickPathItem::setFillMaterial(const QVariant &material)
+void QQuickPathItem::setFillColor(const QColor &color)
 {
-    // ### only color for now but could be a shader source string later on...
-    if (material.type() != QVariant::Color) {
-        qWarning("Unknown fill material");
-        return;
-    }
-    const QColor color = material.value<QColor>();
     if (d->fillColor != color) {
         d->fillColor = color;
-        d->dirty |= QQuickPathItemPrivate::DirtyFillMaterial;
-        emit fillMaterialChanged();
+        d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
+        emit fillColorChanged();
         update();
     }
 }
 
-QVariant QQuickPathItem::strokeMaterial() const
+QColor QQuickPathItem::strokeColor() const
 {
     return d->strokeColor;
 }
 
-void QQuickPathItem::setStrokeMaterial(const QVariant &material)
+void QQuickPathItem::setStrokeColor(const QColor &color)
 {
-    if (material.type() != QVariant::Color) {
-        qWarning("Unknown stroke material");
-        return;
-    }
-    const QColor color = material.value<QColor>();
     if (d->strokeColor != color) {
         d->strokeColor = color;
-        d->dirty |= QQuickPathItemPrivate::DirtyStrokeMaterial;
-        emit strokeMaterialChanged();
+        d->dirty |= QQuickPathItemPrivate::DirtyStrokeColor;
+        emit strokeColorChanged();
         update();
     }
 }

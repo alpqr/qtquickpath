@@ -59,9 +59,9 @@ class QNVPR_EXPORT QQuickPathItem : public QQuickItem
 {
     Q_OBJECT
     Q_PROPERTY(bool fillEnabled READ fillEnabled WRITE setFillEnabled NOTIFY fillEnabledChanged)
-    Q_PROPERTY(QVariant fillMaterial READ fillMaterial WRITE setFillMaterial NOTIFY fillMaterialChanged)
+    Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor NOTIFY fillColorChanged)
     Q_PROPERTY(FillRule fillRule READ fillRule WRITE setFillRule NOTIFY fillRuleChanged)
-    Q_PROPERTY(QVariant strokeMaterial READ strokeMaterial WRITE setStrokeMaterial NOTIFY strokeMaterialChanged)
+    Q_PROPERTY(QColor strokeColor READ strokeColor WRITE setStrokeColor NOTIFY strokeColorChanged)
     Q_PROPERTY(qreal strokeWidth READ strokeWidth WRITE setStrokeWidth NOTIFY strokeWidthChanged)
     Q_PROPERTY(JoinStyle joinStyle READ joinStyle WRITE setJoinStyle NOTIFY joinStyleChanged)
     Q_PROPERTY(int miterLimit READ miterLimit WRITE setMiterLimit NOTIFY miterLimitChanged)
@@ -121,14 +121,14 @@ public:
     bool fillEnabled() const;
     void setFillEnabled(bool enable);
 
-    QVariant fillMaterial() const;
-    void setFillMaterial(const QVariant &material);
+    QColor fillColor() const;
+    void setFillColor(const QColor &color);
 
     FillRule fillRule() const;
     void setFillRule(FillRule fillRule);
 
-    QVariant strokeMaterial() const;
-    void setStrokeMaterial(const QVariant &material);
+    QColor strokeColor() const;
+    void setStrokeColor(const QColor &color);
 
     qreal strokeWidth() const;
     void setStrokeWidth(qreal w);
@@ -150,9 +150,9 @@ protected:
 
 signals:
     void fillEnabledChanged();
-    void fillMaterialChanged();
+    void fillColorChanged();
     void fillRuleChanged();
-    void strokeMaterialChanged();
+    void strokeColorChanged();
     void strokeWidthChanged();
     void joinStyleChanged();
     void miterLimitChanged();

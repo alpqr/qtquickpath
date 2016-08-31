@@ -80,8 +80,8 @@ Item {
             }
             Component.onCompleted: regen()
 
-            fillMaterial: "green"
-            strokeMaterial: "white"
+            fillColor: "green"
+            strokeColor: "white"
             strokeWidth: 4
             strokeStyle: PathItem.DashLine
         }
@@ -92,8 +92,8 @@ Item {
             anchors.top: parent.top
             width: 100
             height: 100
-            strokeMaterial: "blue"
-            fillMaterial: "lightGray"
+            strokeColor: "blue"
+            fillColor: "lightGray"
             strokeWidth: 2
             function draw() {
                 moveTo(50, 50)
@@ -101,7 +101,7 @@ Item {
                 closeSubPath()
             }
             Component.onCompleted: draw()
-            ColorAnimation on fillMaterial {
+            ColorAnimation on fillColor {
                 from: "lightGray"
                 to: "brown"
                 duration: 5000
@@ -115,8 +115,8 @@ Item {
             anchors.bottom: parent.bottom
             width: 100
             height: 100
-            strokeMaterial: "blue"
-            fillMaterial: "lightGray"
+            strokeColor: "blue"
+            fillColor: "lightGray"
             strokeWidth: 2
             function draw() {
                 moveTo(20, 30);
@@ -131,8 +131,8 @@ Item {
             anchors.bottom: parent.bottom
             width: 100
             height: 100
-            strokeMaterial: "blue"
-            fillMaterial: "lightGray"
+            strokeColor: "blue"
+            fillColor: "lightGray"
             strokeWidth: 2
             function draw() {
                 moveTo(90, 50);
@@ -156,7 +156,7 @@ Item {
         y: 50
         width: 100
         height: 100
-        strokeMaterial: "yellow"
+        strokeColor: "yellow"
         strokeWidth: 16
         function draw() {
             lineTo(50, 100)
