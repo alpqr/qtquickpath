@@ -126,13 +126,6 @@ void QQuickEllipseItem::setFillColor(const QColor &color)
     if (pd->fillColor != color) {
         pd->fillColor = color;
         pd->dirty |= QQuickPathItemPrivate::DirtyFillColor;
-        if (pd->fillColor == Qt::transparent) {
-            pd->flags |= QQuickAbstractPathRenderer::RenderNoFill;
-            pd->dirty |= QQuickPathItemPrivate::DirtyFlags;
-        } else if (pd->flags.testFlag(QQuickAbstractPathRenderer::RenderNoFill)) {
-            pd->flags &= ~QQuickAbstractPathRenderer::RenderNoFill;
-            pd->dirty |= QQuickPathItemPrivate::DirtyFlags;
-        }
         emit fillColorChanged();
         update();
     }

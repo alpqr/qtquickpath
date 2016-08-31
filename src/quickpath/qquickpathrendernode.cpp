@@ -124,12 +124,34 @@ void QQuickPathRenderer::setFillColor(const QColor &color)
 {
     m_fillColor = colorToColor4ub(color);
     m_needsNewColor = true;
+
+    if (color == Qt::transparent) {
+        delete m_rootNode->m_fillNode;
+        m_rootNode->m_fillNode = nullptr;
+    } else if (!m_rootNode->m_fillNode) {
+        m_rootNode->m_fillNode = new QQuickPathRenderNode(m_rootNode->m_item);
+        if (m_rootNode->m_strokeNode)
+            m_rootNode->removeChildNode(m_rootNode->m_strokeNode);
+        m_rootNode->appendChildNode(m_rootNode->m_fillNode);
+        if (m_rootNode->m_strokeNode)
+            m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
+        m_needsNewGeom = true;
+    }
 }
 
 void QQuickPathRenderer::setStrokeColor(const QColor &color)
 {
     m_strokeColor = colorToColor4ub(color);
     m_needsNewColor = true;
+
+    if (color == Qt::transparent) {
+        delete m_rootNode->m_strokeNode;
+        m_rootNode->m_strokeNode = nullptr;
+    } else if (!m_rootNode->m_strokeNode) {
+        m_rootNode->m_strokeNode = new QQuickPathRenderNode(m_rootNode->m_item);
+        m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
+        m_needsNewGeom = true;
+    }
 }
 
 void QQuickPathRenderer::setStrokeWidth(qreal w)
@@ -150,18 +172,6 @@ void QQuickPathRenderer::setFlags(RenderFlags flags)
 {
     m_flags = flags;
     m_needsNewGeom = true;
-
-    if (m_flags.testFlag(QQuickAbstractPathRenderer::RenderNoFill)) {
-        delete m_rootNode->m_fillNode;
-        m_rootNode->m_fillNode = nullptr;
-    } else if (!m_rootNode->m_fillNode) {
-        m_rootNode->m_fillNode = new QQuickPathRenderNode(m_rootNode->m_item);
-        if (m_rootNode->m_strokeNode)
-            m_rootNode->removeChildNode(m_rootNode->m_strokeNode);
-        m_rootNode->appendChildNode(m_rootNode->m_fillNode);
-        if (m_rootNode->m_strokeNode)
-            m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
-    }
 }
 
 void QQuickPathRenderer::setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit)

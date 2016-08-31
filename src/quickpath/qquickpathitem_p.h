@@ -58,7 +58,6 @@ class QQuickPathItemPrivate;
 class QQUICKPATH_EXPORT QQuickPathItem : public QQuickItem
 {
     Q_OBJECT
-    Q_PROPERTY(bool fillEnabled READ fillEnabled WRITE setFillEnabled NOTIFY fillEnabledChanged)
     Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor NOTIFY fillColorChanged)
     Q_PROPERTY(FillRule fillRule READ fillRule WRITE setFillRule NOTIFY fillRuleChanged)
     Q_PROPERTY(QColor strokeColor READ strokeColor WRITE setStrokeColor NOTIFY strokeColorChanged)
@@ -119,9 +118,6 @@ public:
     Q_INVOKABLE QRectF boundingRect() const;
     Q_INVOKABLE QRectF controlPointRect() const;
 
-    bool fillEnabled() const;
-    void setFillEnabled(bool enable);
-
     QColor fillColor() const;
     void setFillColor(const QColor &color);
 
@@ -150,7 +146,6 @@ protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
 
 signals:
-    void fillEnabledChanged();
     void fillColorChanged();
     void fillRuleChanged();
     void strokeColorChanged();

@@ -60,7 +60,7 @@ public:
     virtual ~QQuickAbstractPathRenderer() { }
 
     enum RenderFlag {
-        RenderNoFill = 0x01
+        RenderReserved = 0x01
     };
     Q_DECLARE_FLAGS(RenderFlags, RenderFlag)
 

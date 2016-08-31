@@ -3,7 +3,7 @@ import QtQuick.PathItem 2.0
 
 Item {
     Rectangle {
-        id: r
+        id: background
         gradient: Gradient {
             GradientStop { position: 0; color: "steelblue" }
             GradientStop { position: 1; color: "black" }
@@ -133,7 +133,8 @@ Item {
             width: 100
             height: 100
             strokeColor: "blue"
-            fillColor: "lightGray"
+            fillColor: fillEnabled ? "lightGray" : "transparent"
+            property bool fillEnabled: true
             strokeWidth: 2
             function draw() {
                 moveTo(90, 50);
@@ -164,7 +165,7 @@ Item {
             lineTo(0, 100)
 
         }
-        fillEnabled: false
+        fillColor: "transparent"
         capStyle: PathItem.RoundCap
         Component.onCompleted: draw()
         Timer {
@@ -213,16 +214,21 @@ Item {
         radiusY: 20
         borderWidth: 5
         borderColor: "yellow"
-        fillColor: "green"
+        property bool fillEnabled: false
+        fillColor: fillEnabled ? "green" : "transparent"
         Timer {
-            interval: 2000
-            onTriggered: ellipse.fillColor = "transparent"
+            interval: 1000
             running: true
+            repeat: true
+            onTriggered: ellipse.borderWidth = (ellipse.borderWidth > 0 ? 0 : 5)
         }
     }
 
     MouseArea {
         anchors.fill: parent
-        onClicked: { path.ex = path.ex + 1; r.visible = !r.visible; star.fillEnabled = !star.fillEnabled }
+        onClicked: { background.visible = !background.visible;
+            star.fillEnabled = !star.fillEnabled;
+            ellipse.fillEnabled = !ellipse.fillEnabled;
+        }
     }
 }

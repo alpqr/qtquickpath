@@ -60,8 +60,8 @@ QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
         QSGRendererInterface *ri = item->window()->rendererInterface();
         if (!ri)
             return nullptr;
-        const bool hasFill = !flags.testFlag(QQuickAbstractPathRenderer::RenderNoFill);
-        const bool hasStroke = !qFuzzyIsNull(strokeWidth);
+        const bool hasFill = fillColor != Qt::transparent;
+        const bool hasStroke = !qFuzzyIsNull(strokeWidth) && strokeColor != Qt::transparent;
         switch (ri->graphicsApi()) {
 #ifndef QT_NO_OPENGL
             case QSGRendererInterface::OpenGL:
@@ -207,21 +207,6 @@ QRectF QQuickPathItem::boundingRect() const
 QRectF QQuickPathItem::controlPointRect() const
 {
     return d->path.controlPointRect();
-}
-
-bool QQuickPathItem::fillEnabled() const
-{
-    return !d->flags.testFlag(QQuickAbstractPathRenderer::RenderNoFill);
-}
-
-void QQuickPathItem::setFillEnabled(bool enable)
-{
-    if (fillEnabled() != enable) {
-        d->flags.setFlag(QQuickAbstractPathRenderer::RenderNoFill, !enable);
-        d->dirty |= QQuickPathItemPrivate::DirtyFlags;
-        emit fillEnabledChanged();
-        update();
-    }
 }
 
 QQuickPathItem::FillRule QQuickPathItem::fillRule() const
