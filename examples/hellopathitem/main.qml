@@ -200,6 +200,27 @@ Item {
         lineWidth: 5
     }
 
+    EllipseItem {
+        id: ellipse
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 50
+        width: 100
+        height: 100
+        centerX: 50
+        centerY: 50
+        radiusX: 40
+        radiusY: 20
+        borderWidth: 5
+        borderColor: "yellow"
+        fillColor: "green"
+        Timer {
+            interval: 2000
+            onTriggered: ellipse.fillColor = "transparent"
+            running: true
+        }
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: { path.ex = path.ex + 1; r.visible = !r.visible; star.fillEnabled = !star.fillEnabled }

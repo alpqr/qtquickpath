@@ -38,6 +38,7 @@
 #include <QtQml/qqml.h>
 #include <QtQuickPath/private/qquickpathitem_p.h>
 #include <QtQuickPath/private/qquicklineitem_p.h>
+#include <QtQuickPath/private/qquickellipseitem_p.h>
 
 static void initResources()
 {
@@ -60,6 +61,7 @@ public:
         Q_ASSERT(QLatin1String(uri) == QLatin1String("QtQuick.PathItem"));
         qmlRegisterType<QQuickPathItem>(uri, 2, 0, "PathItem");
         qmlRegisterType<QQuickLineItem>(uri, 2, 0, "LineItem");
+        qmlRegisterType<QQuickEllipseItem>(uri, 2, 0, "EllipseItem");
     }
 };
 
