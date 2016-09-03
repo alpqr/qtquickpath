@@ -65,7 +65,7 @@ QSurfaceFormat QNvPathRendering::format()
     fmt.setStencilBufferSize(8);
     if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL) {
         fmt.setVersion(4, 3);
-        fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
+        //fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
     } else if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGLES) {
         fmt.setVersion(3, 1);
     }
