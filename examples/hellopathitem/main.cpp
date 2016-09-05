@@ -48,7 +48,9 @@ int main(int argc, char **argv)
     QGuiApplication app(argc, argv);
 
     QQuickView v;
-    QSurfaceFormat fmt = QNvPathRendering::format();
+    QSurfaceFormat fmt;
+    if (QNvPathRendering::isSupported())
+        fmt = QNvPathRendering::format();
     if (QCoreApplication::arguments().contains(QStringLiteral("--multisample")))
         fmt.setSamples(4);
     v.setFormat(fmt);

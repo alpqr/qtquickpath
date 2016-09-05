@@ -46,7 +46,8 @@
 
 Window::Window()
 {
-    setFormat(QNvPathRendering::format());
+    if (QNvPathRendering::isSupported())
+        setFormat(QNvPathRendering::format());
 }
 
 Window::~Window()

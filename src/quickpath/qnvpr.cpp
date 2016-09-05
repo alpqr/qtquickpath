@@ -65,7 +65,7 @@ QSurfaceFormat QNvPathRendering::format()
     fmt.setStencilBufferSize(8);
     if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGL) {
         fmt.setVersion(4, 3);
-        //fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
+        fmt.setProfile(QSurfaceFormat::CompatibilityProfile);
     } else if (QOpenGLContext::openGLModuleType() == QOpenGLContext::LibGLES) {
         fmt.setVersion(3, 1);
     }
@@ -75,12 +75,26 @@ QSurfaceFormat QNvPathRendering::format()
 /*!
   \return true if GL_NV_path_rendering is supported with the current OpenGL
   context.
+
+  When there is no current context, a temporary dummy one will be created and
+  made current.
  */
 bool QNvPathRendering::isSupported()
 {
     QOpenGLContext *ctx = QOpenGLContext::currentContext();
-    if (!ctx)
-        return false;
+    QScopedPointer<QOpenGLContext> tempContext;
+    QScopedPointer<QOffscreenSurface> tempSurface;
+    if (!ctx) {
+        tempContext.reset(new QOpenGLContext);
+        if (!tempContext->create())
+            return false;
+        ctx = tempContext.data();
+        tempSurface.reset(new QOffscreenSurface);
+        tempSurface->setFormat(ctx->format());
+        tempSurface->create();
+        if (!ctx->makeCurrent(tempSurface.data()))
+            return false;
+    }
 
     if (!ctx->hasExtension(QByteArrayLiteral("GL_NV_path_rendering")))
         return false;
