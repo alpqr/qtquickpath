@@ -281,6 +281,16 @@ typedef void (QOPENGLF_APIENTRYP PFNGLMATRIXLOADFEXTPROC) (GLenum mode, const GL
 typedef void (QOPENGLF_APIENTRYP PFNGLMATRIXLOADIDENTITYEXTPROC) (GLenum mode);
 #endif
 
+// When building on a system with GLES 2.0 or 3.0, we may still compile the NVPR
+// code path even though it's never used. Keep it compiling by defining the
+// necessary ES 3.1 separable program constants.
+#ifndef GL_FRAGMENT_SHADER_BIT
+#define GL_FRAGMENT_SHADER_BIT            0x00000002
+#endif
+#ifndef GL_UNIFORM
+#define GL_UNIFORM                        0x92E1
+#endif
+
 class QNvPathRenderingPrivate;
 
 class QQUICKPATH_EXPORT QNvPathRendering
