@@ -102,9 +102,11 @@ signals:
     void borderWidthChanged();
 
 private:
+    Q_DISABLE_COPY(QQuickEllipseItem)
+    Q_DECLARE_PRIVATE(QQuickPathItem)
+
     void regenerate();
 
-    QQuickPathItemPrivate *pd;
     qreal m_centerX;
     qreal m_centerY;
     qreal m_radiusX;

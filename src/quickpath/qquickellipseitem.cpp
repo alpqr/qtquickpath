@@ -40,8 +40,7 @@
 QT_BEGIN_NAMESPACE
 
 QQuickEllipseItem::QQuickEllipseItem(QQuickItem *parent)
-    : QQuickItem(parent),
-      pd(new QQuickPathItemPrivate),
+    : QQuickItem(*new QQuickPathItemPrivate, parent),
       m_centerX(0),
       m_centerY(0),
       m_radiusX(0),
@@ -52,12 +51,12 @@ QQuickEllipseItem::QQuickEllipseItem(QQuickItem *parent)
 
 QQuickEllipseItem::~QQuickEllipseItem()
 {
-    delete pd;
 }
 
 QSGNode *QQuickEllipseItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
 {
-    return pd->updatePaintNode(this, node);
+    Q_D(QQuickPathItem);
+    return d->updatePaintNode(this, node);
 }
 
 qreal QQuickEllipseItem::centerX() const
@@ -118,14 +117,16 @@ void QQuickEllipseItem::setRadiusY(qreal v)
 
 QColor QQuickEllipseItem::fillColor() const
 {
-    return pd->fillColor;
+    Q_D(const QQuickPathItem);
+    return d->fillColor;
 }
 
 void QQuickEllipseItem::setFillColor(const QColor &color)
 {
-    if (pd->fillColor != color) {
-        pd->fillColor = color;
-        pd->dirty |= QQuickPathItemPrivate::DirtyFillColor;
+    Q_D(QQuickPathItem);
+    if (d->fillColor != color) {
+        d->fillColor = color;
+        d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
         emit fillColorChanged();
         update();
     }
@@ -133,14 +134,16 @@ void QQuickEllipseItem::setFillColor(const QColor &color)
 
 QColor QQuickEllipseItem::borderColor() const
 {
-    return pd->strokeColor;
+    Q_D(const QQuickPathItem);
+    return d->strokeColor;
 }
 
 void QQuickEllipseItem::setBorderColor(const QColor &color)
 {
-    if (pd->strokeColor != color) {
-        pd->strokeColor = color;
-        pd->dirty |= QQuickPathItemPrivate::DirtyStrokeColor;
+    Q_D(QQuickPathItem);
+    if (d->strokeColor != color) {
+        d->strokeColor = color;
+        d->dirty |= QQuickPathItemPrivate::DirtyStrokeColor;
         emit borderColorChanged();
         update();
     }
@@ -148,14 +151,16 @@ void QQuickEllipseItem::setBorderColor(const QColor &color)
 
 qreal QQuickEllipseItem::borderWidth() const
 {
-    return pd->strokeWidth;
+    Q_D(const QQuickPathItem);
+    return d->strokeWidth;
 }
 
 void QQuickEllipseItem::setBorderWidth(qreal w)
 {
-    if (pd->strokeWidth != w) {
-        pd->strokeWidth = w;
-        pd->dirty |= QQuickPathItemPrivate::DirtyStrokeWidth;
+    Q_D(QQuickPathItem);
+    if (d->strokeWidth != w) {
+        d->strokeWidth = w;
+        d->dirty |= QQuickPathItemPrivate::DirtyStrokeWidth;
         emit borderWidthChanged();
         update();
     }
@@ -163,9 +168,10 @@ void QQuickEllipseItem::setBorderWidth(qreal w)
 
 void QQuickEllipseItem::regenerate()
 {
-    pd->path = QPainterPath();
-    pd->path.addEllipse(QPointF(m_centerX, m_centerY), m_radiusX, m_radiusY);
-    pd->dirty |= QQuickPathItemPrivate::DirtyPath;
+    Q_D(QQuickPathItem);
+    d->path = QPainterPath();
+    d->path.addEllipse(QPointF(m_centerX, m_centerY), m_radiusX, m_radiusY);
+    d->dirty |= QQuickPathItemPrivate::DirtyPath;
     update();
 }
 

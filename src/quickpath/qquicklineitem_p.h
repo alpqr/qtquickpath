@@ -96,9 +96,11 @@ signals:
     void lineWidthChanged();
 
 private:
+    Q_DISABLE_COPY(QQuickLineItem)
+    Q_DECLARE_PRIVATE(QQuickPathItem)
+
     void regenerate();
 
-    QQuickPathItemPrivate *pd;
     qreal m_x1, m_y1, m_x2, m_y2;
 };
 

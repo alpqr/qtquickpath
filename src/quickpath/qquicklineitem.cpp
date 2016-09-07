@@ -40,25 +40,25 @@
 QT_BEGIN_NAMESPACE
 
 QQuickLineItem::QQuickLineItem(QQuickItem *parent)
-    : QQuickItem(parent),
-      pd(new QQuickPathItemPrivate),
+    : QQuickItem(*new QQuickPathItemPrivate, parent),
       m_x1(0),
       m_y1(0),
       m_x2(0),
       m_y2(0)
 {
     setFlag(ItemHasContents);
-    pd->fillColor = Qt::transparent;
+    Q_D(QQuickPathItem);
+    d->fillColor = Qt::transparent;
 }
 
 QQuickLineItem::~QQuickLineItem()
 {
-    delete pd;
 }
 
 QSGNode *QQuickLineItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
 {
-    return pd->updatePaintNode(this, node);
+    Q_D(QQuickPathItem);
+    return d->updatePaintNode(this, node);
 }
 
 qreal QQuickLineItem::x1() const
@@ -119,14 +119,16 @@ void QQuickLineItem::setY2(qreal v)
 
 QColor QQuickLineItem::color() const
 {
-    return pd->strokeColor;
+    Q_D(const QQuickPathItem);
+    return d->strokeColor;
 }
 
 void QQuickLineItem::setColor(const QColor &color)
 {
-    if (pd->strokeColor != color) {
-        pd->strokeColor = color;
-        pd->dirty |= QQuickPathItemPrivate::DirtyStrokeColor;
+    Q_D(QQuickPathItem);
+    if (d->strokeColor != color) {
+        d->strokeColor = color;
+        d->dirty |= QQuickPathItemPrivate::DirtyStrokeColor;
         emit colorChanged();
         update();
     }
@@ -134,14 +136,16 @@ void QQuickLineItem::setColor(const QColor &color)
 
 qreal QQuickLineItem::lineWidth() const
 {
-    return pd->strokeWidth;
+    Q_D(const QQuickPathItem);
+    return d->strokeWidth;
 }
 
 void QQuickLineItem::setLineWidth(qreal w)
 {
-    if (pd->strokeWidth != w) {
-        pd->strokeWidth = w;
-        pd->dirty |= QQuickPathItemPrivate::DirtyStrokeWidth;
+    Q_D(QQuickPathItem);
+    if (d->strokeWidth != w) {
+        d->strokeWidth = w;
+        d->dirty |= QQuickPathItemPrivate::DirtyStrokeWidth;
         emit lineWidthChanged();
         update();
     }
@@ -149,10 +153,11 @@ void QQuickLineItem::setLineWidth(qreal w)
 
 void QQuickLineItem::regenerate()
 {
-    pd->path = QPainterPath();
-    pd->path.moveTo(m_x1, m_y1);
-    pd->path.lineTo(m_x2, m_y2);
-    pd->dirty |= QQuickPathItemPrivate::DirtyPath;
+    Q_D(QQuickPathItem);
+    d->path = QPainterPath();
+    d->path.moveTo(m_x1, m_y1);
+    d->path.lineTo(m_x2, m_y2);
+    d->dirty |= QQuickPathItemPrivate::DirtyPath;
     update();
 }
 

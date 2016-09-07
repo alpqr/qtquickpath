@@ -210,7 +210,8 @@ signals:
     void cosmeticStrokeChanged();
 
 private:
-    QQuickPathItemPrivate *d;
+    Q_DISABLE_COPY(QQuickPathItem)
+    Q_DECLARE_PRIVATE(QQuickPathItem)
 };
 
 QT_END_NAMESPACE

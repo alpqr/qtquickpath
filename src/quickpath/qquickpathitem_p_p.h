@@ -50,11 +50,14 @@
 
 #include "qquickpathitem_p.h"
 #include "qquickabstractpathrenderer_p.h"
+#include <private/qquickitem_p.h>
 
 QT_BEGIN_NAMESPACE
 
-class QQuickPathItemPrivate
+class QQuickPathItemPrivate : public QQuickItemPrivate
 {
+    Q_DECLARE_PUBLIC(QQuickPathItem)
+
 public:
     QQuickPathItemPrivate()
         : renderer(nullptr),

@@ -43,15 +43,13 @@
 QT_BEGIN_NAMESPACE
 
 QQuickPathItem::QQuickPathItem(QQuickItem *parent)
-    : QQuickItem(parent),
-      d(new QQuickPathItemPrivate)
+    : QQuickItem(*new QQuickPathItemPrivate, parent)
 {
     setFlag(ItemHasContents);
 }
 
 QQuickPathItem::~QQuickPathItem()
 {
-    delete d;
 }
 
 QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
@@ -114,108 +112,127 @@ QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
 
 QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
 {
+    Q_D(QQuickPathItem);
     return d->updatePaintNode(this, node);
 }
 
 void QQuickPathItem::clear()
 {
+    Q_D(QQuickPathItem);
     d->path = QPainterPath();
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 bool QQuickPathItem::isEmpty() const
 {
+    Q_D(const QQuickPathItem);
     return d->path.isEmpty();
 }
 
 void QQuickPathItem::closeSubPath()
 {
+    Q_D(QQuickPathItem);
     d->path.closeSubpath();
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::moveTo(qreal x, qreal y)
 {
+    Q_D(QQuickPathItem);
     d->path.moveTo(x, y);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::lineTo(qreal x, qreal y)
 {
+    Q_D(QQuickPathItem);
     d->path.lineTo(x, y);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::arcMoveTo(qreal x, qreal y, qreal w, qreal h, qreal angle)
 {
+    Q_D(QQuickPathItem);
     d->path.arcMoveTo(x, y, w, h, angle);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::arcTo(qreal x, qreal y, qreal w, qreal h, qreal startAngle, qreal arcLength)
 {
+    Q_D(QQuickPathItem);
     d->path.arcTo(x, y, w, h, startAngle, arcLength);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::cubicTo(qreal c1x, qreal c1y, qreal c2x, qreal c2y, qreal endX, qreal endY)
 {
+    Q_D(QQuickPathItem);
     d->path.cubicTo(c1x, c1y, c2x, c2y, endX, endY);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::quadTo(qreal cX, qreal cY, qreal endX, qreal endY)
 {
+    Q_D(QQuickPathItem);
     d->path.quadTo(cX, cY, endX, endY);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::addRect(qreal x, qreal y, qreal w, qreal h)
 {
+    Q_D(QQuickPathItem);
     d->path.addRect(x, y, w, h);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::addRoundedRect(qreal x, qreal y, qreal w, qreal h, qreal xr, qreal yr)
 {
+    Q_D(QQuickPathItem);
     d->path.addRoundedRect(x, y, w, h, xr, yr);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::addEllipse(qreal x, qreal y, qreal rx, qreal ry)
 {
+    Q_D(QQuickPathItem);
     d->path.addEllipse(x, y, rx, ry);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 void QQuickPathItem::addEllipseWithCenter(qreal cx, qreal cy, qreal rx, qreal ry)
 {
+    Q_D(QQuickPathItem);
     d->path.addEllipse(QPointF(cx, cy), rx, ry);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
 QPointF QQuickPathItem::currentPosition() const
 {
+    Q_D(const QQuickPathItem);
     return d->path.currentPosition();
 }
 
 QRectF QQuickPathItem::boundingRect() const
 {
+    Q_D(const QQuickPathItem);
     return d->path.boundingRect();
 }
 
 QRectF QQuickPathItem::controlPointRect() const
 {
+    Q_D(const QQuickPathItem);
     return d->path.controlPointRect();
 }
 
 QQuickPathItem::FillRule QQuickPathItem::fillRule() const
 {
+    Q_D(const QQuickPathItem);
     return FillRule(d->path.fillRule());
 }
 
 void QQuickPathItem::setFillRule(FillRule fillRule)
 {
+    Q_D(QQuickPathItem);
     if (d->path.fillRule() != Qt::FillRule(fillRule)) {
         d->path.setFillRule(Qt::FillRule(fillRule));
         d->dirty |= QQuickPathItemPrivate::DirtyPath;
@@ -226,11 +243,13 @@ void QQuickPathItem::setFillRule(FillRule fillRule)
 
 QColor QQuickPathItem::fillColor() const
 {
+    Q_D(const QQuickPathItem);
     return d->fillColor;
 }
 
 void QQuickPathItem::setFillColor(const QColor &color)
 {
+    Q_D(QQuickPathItem);
     if (d->fillColor != color) {
         d->fillColor = color;
         d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
@@ -241,11 +260,13 @@ void QQuickPathItem::setFillColor(const QColor &color)
 
 QQuickPathGradient *QQuickPathItem::fillGradient() const
 {
+    Q_D(const QQuickPathItem);
     return d->fillGradient;
 }
 
 void QQuickPathItem::setFillGradient(QQuickPathGradient *gradient)
 {
+    Q_D(QQuickPathItem);
     if (d->fillGradient != gradient) {
         d->fillGradient = gradient;
         d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
@@ -260,11 +281,13 @@ void QQuickPathItem::resetFillGradient()
 
 QColor QQuickPathItem::strokeColor() const
 {
+    Q_D(const QQuickPathItem);
     return d->strokeColor;
 }
 
 void QQuickPathItem::setStrokeColor(const QColor &color)
 {
+    Q_D(QQuickPathItem);
     if (d->strokeColor != color) {
         d->strokeColor = color;
         d->dirty |= QQuickPathItemPrivate::DirtyStrokeColor;
@@ -275,11 +298,13 @@ void QQuickPathItem::setStrokeColor(const QColor &color)
 
 qreal QQuickPathItem::strokeWidth() const
 {
+    Q_D(const QQuickPathItem);
     return d->strokeWidth;
 }
 
 void QQuickPathItem::setStrokeWidth(qreal w)
 {
+    Q_D(QQuickPathItem);
     if (d->strokeWidth != w) {
         d->strokeWidth = w;
         d->dirty |= QQuickPathItemPrivate::DirtyStrokeWidth;
@@ -290,11 +315,13 @@ void QQuickPathItem::setStrokeWidth(qreal w)
 
 QQuickPathItem::JoinStyle QQuickPathItem::joinStyle() const
 {
+    Q_D(const QQuickPathItem);
     return d->joinStyle;
 }
 
 void QQuickPathItem::setJoinStyle(JoinStyle style)
 {
+    Q_D(QQuickPathItem);
     if (d->joinStyle != style) {
         d->joinStyle = style;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
@@ -305,11 +332,13 @@ void QQuickPathItem::setJoinStyle(JoinStyle style)
 
 int QQuickPathItem::miterLimit() const
 {
+    Q_D(const QQuickPathItem);
     return d->miterLimit;
 }
 
 void QQuickPathItem::setMiterLimit(int limit)
 {
+    Q_D(QQuickPathItem);
     if (d->miterLimit != limit) {
         d->miterLimit = limit;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
@@ -320,11 +349,13 @@ void QQuickPathItem::setMiterLimit(int limit)
 
 QQuickPathItem::CapStyle QQuickPathItem::capStyle() const
 {
+    Q_D(const QQuickPathItem);
     return d->capStyle;
 }
 
 void QQuickPathItem::setCapStyle(CapStyle style)
 {
+    Q_D(QQuickPathItem);
     if (d->capStyle != style) {
         d->capStyle = style;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
@@ -335,11 +366,13 @@ void QQuickPathItem::setCapStyle(CapStyle style)
 
 QQuickPathItem::StrokeStyle QQuickPathItem::strokeStyle() const
 {
+    Q_D(const QQuickPathItem);
     return d->strokeStyle;
 }
 
 void QQuickPathItem::setStrokeStyle(StrokeStyle style)
 {
+    Q_D(QQuickPathItem);
     if (d->strokeStyle != style) {
         d->strokeStyle = style;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
@@ -350,11 +383,13 @@ void QQuickPathItem::setStrokeStyle(StrokeStyle style)
 
 qreal QQuickPathItem::dashOffset() const
 {
+    Q_D(const QQuickPathItem);
     return d->dashOffset;
 }
 
 void QQuickPathItem::setDashOffset(qreal offset)
 {
+    Q_D(QQuickPathItem);
     if (d->dashOffset != offset) {
         d->dashOffset = offset;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
@@ -365,11 +400,13 @@ void QQuickPathItem::setDashOffset(qreal offset)
 
 QVector<qreal> QQuickPathItem::dashPattern() const
 {
+    Q_D(const QQuickPathItem);
     return d->dashPattern;
 }
 
 void QQuickPathItem::setDashPattern(const QVector<qreal> &array)
 {
+    Q_D(QQuickPathItem);
     if (d->dashPattern != array) {
         d->dashPattern = array;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
@@ -380,11 +417,13 @@ void QQuickPathItem::setDashPattern(const QVector<qreal> &array)
 
 bool QQuickPathItem::isCosmeticStroke() const
 {
+    Q_D(const QQuickPathItem);
     return d->cosmeticStroke;
 }
 
 void QQuickPathItem::setCosmeticStroke(bool cosmetic)
 {
+    Q_D(QQuickPathItem);
     if (d->cosmeticStroke != cosmetic) {
         d->cosmeticStroke = cosmetic;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;

@@ -1,5 +1,5 @@
 TEMPLATE = lib
-QT += gui-private quick
+QT += gui-private quick quick-private
 TARGET = QtQuickPath
 
 load(qt_module)
