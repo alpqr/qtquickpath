@@ -202,7 +202,8 @@ void QNvprPathRenderer::setCapStyle(QQuickPathItem::CapStyle capStyle)
 }
 
 void QNvprPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
-                                       qreal dashOffset, const QVector<qreal> &dashPattern)
+                                       qreal dashOffset, const QVector<qreal> &dashPattern,
+                                       bool cosmeticStroke)
 {
 }
 

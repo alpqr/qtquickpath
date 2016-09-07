@@ -73,7 +73,8 @@ public:
     virtual void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) = 0;
     virtual void setCapStyle(QQuickPathItem::CapStyle capStyle) = 0;
     virtual void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
-                                qreal dashOffset, const QVector<qreal> &dashPattern) = 0;
+                                qreal dashOffset, const QVector<qreal> &dashPattern,
+                                bool cosmeticStroke) = 0;
     virtual void endSync() = 0;
 };
 

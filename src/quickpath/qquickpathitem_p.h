@@ -68,6 +68,7 @@ class QQUICKPATH_EXPORT QQuickPathItem : public QQuickItem
     Q_PROPERTY(StrokeStyle strokeStyle READ strokeStyle WRITE setStrokeStyle NOTIFY strokeStyleChanged)
     Q_PROPERTY(qreal dashOffset READ dashOffset WRITE setDashOffset NOTIFY dashOffsetChanged)
     Q_PROPERTY(QVector<qreal> dashPattern READ dashPattern WRITE setDashPattern NOTIFY dashPatternChanged)
+    Q_PROPERTY(bool cosmeticStroke READ isCosmeticStroke WRITE setCosmeticStroke NOTIFY cosmeticStrokeChanged)
 
 public:
     enum FillRule {
@@ -149,6 +150,9 @@ public:
     QVector<qreal> dashPattern() const;
     void setDashPattern(const QVector<qreal> &array);
 
+    bool isCosmeticStroke() const;
+    void setCosmeticStroke(bool cosmetic);
+
 protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
 
@@ -163,6 +167,7 @@ signals:
     void strokeStyleChanged();
     void dashOffsetChanged();
     void dashPatternChanged();
+    void cosmeticStrokeChanged();
 
 private:
     QQuickPathItemPrivate *d;

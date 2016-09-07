@@ -72,7 +72,8 @@ public:
     void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) override;
     void setCapStyle(QQuickPathItem::CapStyle capStyle) override;
     void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
-                        qreal dashOffset, const QVector<qreal> &dashPattern) override;
+                        qreal dashOffset, const QVector<qreal> &dashPattern,
+                        bool cosmeticStroke) override;
     void endSync() override;
 
     struct Color4ub { unsigned char r, g, b, a; };

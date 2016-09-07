@@ -124,48 +124,18 @@ void QQuickPathRenderer::setFillColor(const QColor &color)
 {
     m_fillColor = colorToColor4ub(color);
     m_needsNewColor = true;
-
-    if (color == Qt::transparent) {
-        delete m_rootNode->m_fillNode;
-        m_rootNode->m_fillNode = nullptr;
-    } else if (!m_rootNode->m_fillNode) {
-        m_rootNode->m_fillNode = new QQuickPathRenderNode(m_rootNode->m_item);
-        if (m_rootNode->m_strokeNode)
-            m_rootNode->removeChildNode(m_rootNode->m_strokeNode);
-        m_rootNode->appendChildNode(m_rootNode->m_fillNode);
-        if (m_rootNode->m_strokeNode)
-            m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
-        m_needsNewGeom = true;
-    }
 }
 
 void QQuickPathRenderer::setStrokeColor(const QColor &color)
 {
     m_strokeColor = colorToColor4ub(color);
     m_needsNewColor = true;
-
-    if (color == Qt::transparent) {
-        delete m_rootNode->m_strokeNode;
-        m_rootNode->m_strokeNode = nullptr;
-    } else if (!m_rootNode->m_strokeNode) {
-        m_rootNode->m_strokeNode = new QQuickPathRenderNode(m_rootNode->m_item);
-        m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
-        m_needsNewGeom = true;
-    }
 }
 
 void QQuickPathRenderer::setStrokeWidth(qreal w)
 {
     m_pen.setWidthF(w);
     m_needsNewGeom = true;
-
-    if (qFuzzyIsNull(w)) {
-        delete m_rootNode->m_strokeNode;
-        m_rootNode->m_strokeNode = nullptr;
-    } else if (!m_rootNode->m_strokeNode) {
-        m_rootNode->m_strokeNode = new QQuickPathRenderNode(m_rootNode->m_item);
-        m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
-    }
 }
 
 void QQuickPathRenderer::setFlags(RenderFlags flags)
@@ -188,22 +158,47 @@ void QQuickPathRenderer::setCapStyle(QQuickPathItem::CapStyle capStyle)
 }
 
 void QQuickPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
-                                        qreal dashOffset, const QVector<qreal> &dashPattern)
+                                        qreal dashOffset, const QVector<qreal> &dashPattern,
+                                        bool cosmeticStroke)
 {
     m_pen.setStyle(Qt::PenStyle(strokeStyle));
     if (strokeStyle == QQuickPathItem::DashLine) {
         m_pen.setDashPattern(dashPattern);
         m_pen.setDashOffset(dashOffset);
     }
+    m_pen.setCosmetic(cosmeticStroke);
     m_needsNewGeom = true;
 }
 
 void QQuickPathRenderer::endSync()
 {
-    if (m_needsNewGeom || m_needsNewColor) {
-        fill();
-        stroke();
+    if (!m_needsNewGeom && !m_needsNewColor)
+        return;
+
+    if (m_fillColor.a == 0) {
+        delete m_rootNode->m_fillNode;
+        m_rootNode->m_fillNode = nullptr;
+    } else if (!m_rootNode->m_fillNode) {
+        m_rootNode->m_fillNode = new QQuickPathRenderNode(m_rootNode->m_item);
+        if (m_rootNode->m_strokeNode)
+            m_rootNode->removeChildNode(m_rootNode->m_strokeNode);
+        m_rootNode->appendChildNode(m_rootNode->m_fillNode);
+        if (m_rootNode->m_strokeNode)
+            m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
+        m_needsNewGeom = true;
     }
+
+    if (qFuzzyIsNull(m_pen.widthF()) || m_strokeColor.a == 0) {
+        delete m_rootNode->m_strokeNode;
+        m_rootNode->m_strokeNode = nullptr;
+    } else if (!m_rootNode->m_strokeNode) {
+        m_rootNode->m_strokeNode = new QQuickPathRenderNode(m_rootNode->m_item);
+        m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
+        m_needsNewGeom = true;
+    }
+
+    fill();
+    stroke();
 }
 
 void QQuickPathRenderer::fill()

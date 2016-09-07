@@ -103,7 +103,7 @@ QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
     if (dirty & QQuickPathItemPrivate::DirtyStyle) {
         renderer->setJoinStyle(joinStyle, miterLimit);
         renderer->setCapStyle(capStyle);
-        renderer->setStrokeStyle(strokeStyle, dashOffset, dashPattern);
+        renderer->setStrokeStyle(strokeStyle, dashOffset, dashPattern, cosmeticStroke);
     }
 
     renderer->endSync();
@@ -355,6 +355,21 @@ void QQuickPathItem::setDashPattern(const QVector<qreal> &array)
         d->dashPattern = array;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit dashPatternChanged();
+        update();
+    }
+}
+
+bool QQuickPathItem::isCosmeticStroke() const
+{
+    return d->cosmeticStroke;
+}
+
+void QQuickPathItem::setCosmeticStroke(bool cosmetic)
+{
+    if (d->cosmeticStroke != cosmetic) {
+        d->cosmeticStroke = cosmetic;
+        d->dirty |= QQuickPathItemPrivate::DirtyStyle;
+        emit cosmeticStrokeChanged();
         update();
     }
 }

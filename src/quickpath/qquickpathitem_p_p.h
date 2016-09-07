@@ -67,7 +67,8 @@ public:
           miterLimit(2),
           capStyle(QQuickPathItem::SquareCap),
           strokeStyle(QQuickPathItem::SolidLine),
-          dashOffset(0)
+          dashOffset(0),
+          cosmeticStroke(false)
     {
         dashPattern << 4 << 2; // 4 * strokeWidth dash followed by 2 * strokeWidth space
     }
@@ -97,6 +98,7 @@ public:
     QQuickPathItem::StrokeStyle strokeStyle;
     qreal dashOffset;
     QVector<qreal> dashPattern;
+    bool cosmeticStroke;
 };
 
 QT_END_NAMESPACE
