@@ -25,6 +25,7 @@ Item {
         border.width: 4
         color: "transparent"
         NumberAnimation on rotation {
+            running: background.visible
             from: 0
             to: 360
             duration: 5000
@@ -81,9 +82,17 @@ Item {
             Component.onCompleted: regen()
 
             fillColor: "green"
-            strokeColor: "white"
+            strokeColor: "red"
             strokeWidth: 4
             strokeStyle: PathItem.DashLine
+            property real firstSpaceLength: 1
+            dashPattern: [ 1, firstSpaceLength, 4, 2 ]
+            NumberAnimation on firstSpaceLength { // a bit extreme example :)
+                from: 1
+                to: 50
+                duration: 10000
+                loops: Animation.Infinite
+            }
         }
 
         // pie

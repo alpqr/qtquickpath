@@ -191,6 +191,10 @@ void QQuickPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
                                         qreal dashOffset, const QVector<qreal> &dashPattern)
 {
     m_pen.setStyle(Qt::PenStyle(strokeStyle));
+    if (strokeStyle == QQuickPathItem::DashLine) {
+        m_pen.setDashPattern(dashPattern);
+        m_pen.setDashOffset(dashOffset);
+    }
     m_needsNewGeom = true;
 }
 

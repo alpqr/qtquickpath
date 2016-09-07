@@ -49,6 +49,8 @@ int main(int argc, char **argv)
 
     QQuickView v;
     QSurfaceFormat fmt;
+    fmt.setDepthBufferSize(24);
+    fmt.setStencilBufferSize(8);
     if (QNvPathRendering::isSupported())
         fmt = QNvPathRendering::format();
     if (QCoreApplication::arguments().contains(QStringLiteral("--multisample")))
