@@ -34,43 +34,63 @@
 **
 ****************************************************************************/
 
-#include <QtQml/qqmlextensionplugin.h>
-#include <QtQml/qqml.h>
-#include <QtQuickPath/private/qquickpathitem_p.h>
-#include <QtQuickPath/private/qquickpathgradient_p.h>
-#include <QtQuickPath/private/qquickpathcommand_p.h>
-#include <QtQuickPath/private/qquicklineitem_p.h>
-#include <QtQuickPath/private/qquickellipseitem_p.h>
+#ifndef QQUICKPATHGRADIENT_P_H
+#define QQUICKPATHGRADIENT_P_H
 
-static void initResources()
-{
-#ifdef QT_STATIC
-    Q_INIT_RESOURCE(qmake_QtQuick_Path)
-#endif
-}
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include <QtQuickPath/qtquickpathglobal.h>
+#include <QQuickItem>
 
 QT_BEGIN_NAMESPACE
 
-class QmlPathPlugin : public QQmlExtensionPlugin
+class QQUICKPATH_EXPORT QQuickPathGradientStop : public QObject
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
+    Q_PROPERTY(qreal position READ position WRITE setPosition)
+    Q_PROPERTY(QColor color READ color WRITE setColor)
 
 public:
-    QmlPathPlugin(QObject *parent = 0) : QQmlExtensionPlugin(parent) { initResources(); }
-    void registerTypes(const char *uri) override
-    {
-        Q_ASSERT(QLatin1String(uri) == QLatin1String("QtQuick.PathItem"));
-        qmlRegisterType<QQuickPathItem>(uri, 2, 0, "PathItem");
-        qmlRegisterType<QQuickPathGradientStop>(uri, 2, 0, "PathGradientStop");
-        qmlRegisterType<QQuickPathGradient>(uri, 2, 0, "PathGradient");
-        qmlRegisterType<QQuickPathMoveTo>(uri, 2, 0, "MoveTo");
-        qmlRegisterType<QQuickPathLineTo>(uri, 2, 0, "LineTo");
-        qmlRegisterType<QQuickLineItem>(uri, 2, 0, "LineItem");
-        qmlRegisterType<QQuickEllipseItem>(uri, 2, 0, "EllipseItem");
-    }
+    QQuickPathGradientStop(QObject *parent = nullptr);
+
+    qreal position() const;
+    void setPosition(qreal position);
+
+    QColor color() const;
+    void setColor(const QColor &color);
+
+private:
+    qreal m_position;
+    QColor m_color;
+};
+
+class QQUICKPATH_EXPORT QQuickPathGradient : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QQmlListProperty<QQuickPathGradientStop> stops READ stops)
+    Q_CLASSINFO("DefaultProperty", "stops")
+
+public:
+    QQuickPathGradient(QObject *parent = nullptr);
+
+    QQmlListProperty<QQuickPathGradientStop> stops();
+
+signals:
+    void updated();
+
+private:
+    QList<QQuickPathGradientStop *> m_stops;
 };
 
 QT_END_NAMESPACE
 
-#include "plugin.moc"
+#endif

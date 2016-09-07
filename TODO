@@ -1,5 +1,7 @@
 
 - declarative command API
+  + drop LineItem and EllipseItem once the same can be achieved via PathItem { MoveTo { ... } LineTo { ... } }
+  + count/at/etc. for the commands property
 
 - linear gradient for filling
   + like GL paint engine but generate color table via GL?

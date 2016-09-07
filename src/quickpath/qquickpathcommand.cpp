@@ -34,43 +34,92 @@
 **
 ****************************************************************************/
 
-#include <QtQml/qqmlextensionplugin.h>
-#include <QtQml/qqml.h>
-#include <QtQuickPath/private/qquickpathitem_p.h>
-#include <QtQuickPath/private/qquickpathgradient_p.h>
-#include <QtQuickPath/private/qquickpathcommand_p.h>
-#include <QtQuickPath/private/qquicklineitem_p.h>
-#include <QtQuickPath/private/qquickellipseitem_p.h>
-
-static void initResources()
-{
-#ifdef QT_STATIC
-    Q_INIT_RESOURCE(qmake_QtQuick_Path)
-#endif
-}
+#include "qquickpathcommand_p.h"
+#include "qquickpathitem_p_p.h"
 
 QT_BEGIN_NAMESPACE
 
-class QmlPathPlugin : public QQmlExtensionPlugin
-{
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
+#define UPDATE_PATH_ITEM QQuickPathItemPrivate::get(static_cast<QQuickPathItem *>(parent()))->handlePathCommandChange
 
-public:
-    QmlPathPlugin(QObject *parent = 0) : QQmlExtensionPlugin(parent) { initResources(); }
-    void registerTypes(const char *uri) override
-    {
-        Q_ASSERT(QLatin1String(uri) == QLatin1String("QtQuick.PathItem"));
-        qmlRegisterType<QQuickPathItem>(uri, 2, 0, "PathItem");
-        qmlRegisterType<QQuickPathGradientStop>(uri, 2, 0, "PathGradientStop");
-        qmlRegisterType<QQuickPathGradient>(uri, 2, 0, "PathGradient");
-        qmlRegisterType<QQuickPathMoveTo>(uri, 2, 0, "MoveTo");
-        qmlRegisterType<QQuickPathLineTo>(uri, 2, 0, "LineTo");
-        qmlRegisterType<QQuickLineItem>(uri, 2, 0, "LineItem");
-        qmlRegisterType<QQuickEllipseItem>(uri, 2, 0, "EllipseItem");
+QQuickPathCommand::QQuickPathCommand(QObject *parent)
+    : QObject(parent)
+{
+}
+
+QQuickPathMoveTo::QQuickPathMoveTo(QObject *parent)
+    : QQuickPathCommand(parent),
+      m_x(0),
+      m_y(0)
+{
+}
+
+qreal QQuickPathMoveTo::x() const
+{
+    return m_x;
+}
+
+void QQuickPathMoveTo::setX(qreal v)
+{
+    if (m_x != v) {
+        m_x = v;
+        UPDATE_PATH_ITEM();
     }
-};
+}
+
+qreal QQuickPathMoveTo::y() const
+{
+    return m_y;
+}
+
+void QQuickPathMoveTo::setY(qreal v)
+{
+    if (m_y != v) {
+        m_y = v;
+        UPDATE_PATH_ITEM();
+    }
+}
+
+void QQuickPathMoveTo::addToPath(QPainterPath *path)
+{
+    path->moveTo(m_x, m_y);
+}
+
+QQuickPathLineTo::QQuickPathLineTo(QObject *parent)
+    : QQuickPathCommand(parent),
+      m_x(0),
+      m_y(0)
+{
+}
+
+qreal QQuickPathLineTo::x() const
+{
+    return m_x;
+}
+
+void QQuickPathLineTo::setX(qreal v)
+{
+    if (m_x != v) {
+        m_x = v;
+        UPDATE_PATH_ITEM();
+    }
+}
+
+qreal QQuickPathLineTo::y() const
+{
+    return m_y;
+}
+
+void QQuickPathLineTo::setY(qreal v)
+{
+    if (m_y != v) {
+        m_y = v;
+        UPDATE_PATH_ITEM();
+    }
+}
+
+void QQuickPathLineTo::addToPath(QPainterPath *path)
+{
+    path->lineTo(m_x, m_y);
+}
 
 QT_END_NAMESPACE
-
-#include "plugin.moc"

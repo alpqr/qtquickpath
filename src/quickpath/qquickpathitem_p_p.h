@@ -78,6 +78,9 @@ public:
     }
     ~QQuickPathItemPrivate() { delete renderer; }
 
+    static QQuickPathItemPrivate *get(QQuickPathItem *item) { return item->d_func(); }
+    static void appendCommand(QQmlListProperty<QObject> *list, QObject *cmd);
+    void handlePathCommandChange();
     QSGNode *updatePaintNode(QQuickItem *item, QSGNode *node);
 
     enum Dirty {
@@ -104,6 +107,7 @@ public:
     QVector<qreal> dashPattern;
     bool cosmeticStroke;
     QQuickPathGradient *fillGradient;
+    QVector<QQuickPathCommand *> commands;
 };
 
 QT_END_NAMESPACE

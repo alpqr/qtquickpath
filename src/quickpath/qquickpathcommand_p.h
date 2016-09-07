@@ -34,43 +34,86 @@
 **
 ****************************************************************************/
 
-#include <QtQml/qqmlextensionplugin.h>
-#include <QtQml/qqml.h>
-#include <QtQuickPath/private/qquickpathitem_p.h>
-#include <QtQuickPath/private/qquickpathgradient_p.h>
-#include <QtQuickPath/private/qquickpathcommand_p.h>
-#include <QtQuickPath/private/qquicklineitem_p.h>
-#include <QtQuickPath/private/qquickellipseitem_p.h>
+#ifndef QQUICKPATHCOMMAND_P_H
+#define QQUICKPATHCOMMAND_P_H
 
-static void initResources()
-{
-#ifdef QT_STATIC
-    Q_INIT_RESOURCE(qmake_QtQuick_Path)
-#endif
-}
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include <QtQuickPath/qtquickpathglobal.h>
+#include <QQuickItem>
+#include <QPainterPath>
 
 QT_BEGIN_NAMESPACE
 
-class QmlPathPlugin : public QQmlExtensionPlugin
+class QQUICKPATH_EXPORT QQuickPathCommand : public QObject
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
 
 public:
-    QmlPathPlugin(QObject *parent = 0) : QQmlExtensionPlugin(parent) { initResources(); }
-    void registerTypes(const char *uri) override
-    {
-        Q_ASSERT(QLatin1String(uri) == QLatin1String("QtQuick.PathItem"));
-        qmlRegisterType<QQuickPathItem>(uri, 2, 0, "PathItem");
-        qmlRegisterType<QQuickPathGradientStop>(uri, 2, 0, "PathGradientStop");
-        qmlRegisterType<QQuickPathGradient>(uri, 2, 0, "PathGradient");
-        qmlRegisterType<QQuickPathMoveTo>(uri, 2, 0, "MoveTo");
-        qmlRegisterType<QQuickPathLineTo>(uri, 2, 0, "LineTo");
-        qmlRegisterType<QQuickLineItem>(uri, 2, 0, "LineItem");
-        qmlRegisterType<QQuickEllipseItem>(uri, 2, 0, "EllipseItem");
-    }
+    QQuickPathCommand(QObject *parent = nullptr);
+
+    virtual void addToPath(QPainterPath *path) = 0;
+};
+
+class QQUICKPATH_EXPORT QQuickPathMoveTo : public QQuickPathCommand
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal x READ x WRITE setX NOTIFY xChanged)
+    Q_PROPERTY(qreal y READ y WRITE setY NOTIFY yChanged)
+
+public:
+    QQuickPathMoveTo(QObject *parent = nullptr);
+
+    qreal x() const;
+    void setX(qreal v);
+    qreal y() const;
+    void setY(qreal v);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void xChanged();
+    void yChanged();
+
+private:
+    qreal m_x;
+    qreal m_y;
+};
+
+class QQUICKPATH_EXPORT QQuickPathLineTo : public QQuickPathCommand
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal x READ x WRITE setX NOTIFY xChanged)
+    Q_PROPERTY(qreal y READ y WRITE setY NOTIFY yChanged)
+
+public:
+    QQuickPathLineTo(QObject *parent = nullptr);
+
+    qreal x() const;
+    void setX(qreal v);
+    qreal y() const;
+    void setY(qreal v);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void xChanged();
+    void yChanged();
+
+private:
+    qreal m_x;
+    qreal m_y;
 };
 
 QT_END_NAMESPACE
 
-#include "plugin.moc"
+#endif

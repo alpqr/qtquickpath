@@ -52,6 +52,26 @@ QQuickPathItem::~QQuickPathItem()
 {
 }
 
+void QQuickPathItemPrivate::appendCommand(QQmlListProperty<QObject> *list, QObject *cmd)
+{
+    QQuickPathCommand *ccmd = qobject_cast<QQuickPathCommand *>(cmd);
+    if (!ccmd) {
+        qWarning("Cannot add non-QQuickPathCommand derived items to the command list");
+        return;
+    }
+    QQuickPathItem *item = qobject_cast<QQuickPathItem *>(list->object);
+    Q_ASSERT(item);
+    ccmd->setParent(item);
+    QQuickPathItemPrivate::get(item)->commands.append(ccmd);
+}
+
+void QQuickPathItemPrivate::handlePathCommandChange()
+{
+    Q_Q(QQuickPathItem);
+    dirty |= QQuickPathItemPrivate::DirtyPath;
+    q->update();
+}
+
 QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
 {
     if (!node) {
@@ -88,8 +108,14 @@ QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
 
     renderer->beginSync();
 
-    if (dirty & QQuickPathItemPrivate::DirtyPath)
+    if (dirty & QQuickPathItemPrivate::DirtyPath) {
+        if (!commands.isEmpty()) {
+            path = QPainterPath();
+            for (QQuickPathCommand *cmd : qAsConst(commands))
+                cmd->addToPath(&path);
+        }
         renderer->setPath(path);
+    }
     if (dirty & QQuickPathItemPrivate::DirtyFillColor)
         renderer->setFillColor(fillColor, fillGradient);
     if (dirty & QQuickPathItemPrivate::DirtyStrokeColor)
@@ -268,7 +294,11 @@ void QQuickPathItem::setFillGradient(QQuickPathGradient *gradient)
 {
     Q_D(QQuickPathItem);
     if (d->fillGradient != gradient) {
+        if (d->fillGradient)
+            disconnect(d->fillGradient, &QQuickPathGradient::updated, this, &QQuickItem::update);
         d->fillGradient = gradient;
+        if (d->fillGradient)
+            connect(d->fillGradient, &QQuickPathGradient::updated, this, &QQuickItem::update);
         d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
         update();
     }
@@ -432,41 +462,9 @@ void QQuickPathItem::setCosmeticStroke(bool cosmetic)
     }
 }
 
-QQuickPathGradientStop::QQuickPathGradientStop(QObject *parent)
-    : QObject(parent),
-      m_position(0),
-      m_color(Qt::black)
+QQmlListProperty<QObject> QQuickPathItem::commands()
 {
-}
-
-qreal QQuickPathGradientStop::position() const
-{
-    return m_position;
-}
-
-void QQuickPathGradientStop::setPosition(qreal position)
-{
-    m_position = position;
-}
-
-QColor QQuickPathGradientStop::color() const
-{
-    return m_color;
-}
-
-void QQuickPathGradientStop::setColor(const QColor &color)
-{
-    m_color = color;
-}
-
-QQuickPathGradient::QQuickPathGradient(QObject *parent)
-    : QObject(parent)
-{
-}
-
-QQmlListProperty<QQuickPathGradientStop> QQuickPathGradient::stops()
-{
-    return QQmlListProperty<QQuickPathGradientStop>(this, m_stops);
+    return QQmlListProperty<QObject>(this, nullptr, &QQuickPathItemPrivate::appendCommand, nullptr, nullptr, nullptr);
 }
 
 QT_END_NAMESPACE

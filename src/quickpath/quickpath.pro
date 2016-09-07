@@ -11,6 +11,8 @@ SOURCES += $$PWD/qnvpr.cpp \
            $$PWD/qquickpathrendernode.cpp \
            $$PWD/qquickpathrendermaterial.cpp \
            $$PWD/qquickpathitem.cpp \
+           $$PWD/qquickpathgradient.cpp \
+           $$PWD/qquickpathcommand.cpp \
            $$PWD/qquicklineitem.cpp \
            $$PWD/qquickellipseitem.cpp
 
@@ -23,5 +25,7 @@ HEADERS += $$PWD/qnvpr.h \
            $$PWD/qquickpathrendermaterial_p.h \
            $$PWD/qquickpathitem_p.h \
            $$PWD/qquickpathitem_p_p.h \
+           $$PWD/qquickpathgradient_p.h \
+           $$PWD/qquickpathcommand_p.h \
            $$PWD/qquicklineitem_p.h \
            $$PWD/qquickellipseitem_p.h

@@ -154,16 +154,18 @@ Item {
                 closeSubPath()
             }
             Component.onCompleted: draw()
-            Timer {
-                interval: 1000
-                onTriggered: star.fillRule = (star.fillRule === PathItem.OddEvenFill ? PathItem.WindingFill : PathItem.OddEvenFill)
-                repeat: true
-                running: true
-            }
+        }
+
+        Timer {
+            interval: 1000
+            onTriggered: star.fillRule = (star.fillRule === PathItem.OddEvenFill ? PathItem.WindingFill : PathItem.OddEvenFill)
+            repeat: true
+            running: true
         }
     }
 
     PathItem {
+        id: joinTest
         x: 50
         y: 50
         width: 100
@@ -178,37 +180,46 @@ Item {
         fillColor: "transparent"
         capStyle: PathItem.RoundCap
         Component.onCompleted: draw()
-        Timer {
-            interval: 1000
-            repeat: true
-            running: true
-            property variant styles: [ PathItem.BevelJoin, PathItem.MiterJoin, PathItem.RoundJoin ]
-            onTriggered: {
-                for (var i = 0; i < styles.length; ++i)
-                    if (styles[i] === parent.joinStyle) {
-                        parent.joinStyle = styles[(i + 1) % styles.length];
-                        break;
-                    }
-            }
+    }
+
+    Timer {
+        interval: 1000
+        repeat: true
+        running: true
+        property variant styles: [ PathItem.BevelJoin, PathItem.MiterJoin, PathItem.RoundJoin ]
+        onTriggered: {
+            for (var i = 0; i < styles.length; ++i)
+                if (styles[i] === joinTest.joinStyle) {
+                    joinTest.joinStyle = styles[(i + 1) % styles.length];
+                    break;
+                }
         }
     }
 
-    LineItem {
+    // now a line with the declarative command api
+    PathItem {
         anchors.bottom: parent.bottom
         anchors.margins: 50
         width: 100
         height: 100
-        x1: 10
-        y1: 10
-        x2: 90
-        NumberAnimation on y2 {
-            from: 10
-            to: 90
-            duration: 2000
-            loops: Animation.Infinite
+        strokeColor: "green"
+        strokeWidth: 5
+        fillColor: "transparent" // just an optimization
+
+        MoveTo {
+            x: 10
+            y: 10
         }
-        color: "green"
-        lineWidth: 5
+        LineTo {
+            x: 90
+            y: 10
+            NumberAnimation on y {
+                from: 10
+                to: 90
+                duration: 2000
+                loops: Animation.Infinite
+            }
+        }
     }
 
     EllipseItem {

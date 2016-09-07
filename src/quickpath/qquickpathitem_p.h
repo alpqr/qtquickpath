@@ -50,49 +50,17 @@
 
 #include <QtQuickPath/qtquickpathglobal.h>
 #include <QQuickItem>
+#include "qquickpathgradient_p.h"
+#include "qquickpathcommand_p.h"
 
 QT_BEGIN_NAMESPACE
 
 class QQuickPathItemPrivate;
 
-class QQUICKPATH_EXPORT QQuickPathGradientStop : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(qreal position READ position WRITE setPosition)
-    Q_PROPERTY(QColor color READ color WRITE setColor)
-
-public:
-    QQuickPathGradientStop(QObject *parent = nullptr);
-
-    qreal position() const;
-    void setPosition(qreal position);
-
-    QColor color() const;
-    void setColor(const QColor &color);
-
-private:
-    qreal m_position;
-    QColor m_color;
-};
-
-class QQUICKPATH_EXPORT QQuickPathGradient : public QObject
-{
-    Q_OBJECT
-    Q_PROPERTY(QQmlListProperty<QQuickPathGradientStop> stops READ stops)
-    Q_CLASSINFO("DefaultProperty", "stops")
-
-public:
-    QQuickPathGradient(QObject *parent = nullptr);
-
-    QQmlListProperty<QQuickPathGradientStop> stops();
-
-private:
-    QList<QQuickPathGradientStop *> m_stops;
-};
-
 class QQUICKPATH_EXPORT QQuickPathItem : public QQuickItem
 {
     Q_OBJECT
+
     Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor NOTIFY fillColorChanged)
     Q_PROPERTY(QQuickPathGradient *fillGradient READ fillGradient WRITE setFillGradient RESET resetFillGradient)
     Q_PROPERTY(FillRule fillRule READ fillRule WRITE setFillRule NOTIFY fillRuleChanged)
@@ -105,6 +73,9 @@ class QQUICKPATH_EXPORT QQuickPathItem : public QQuickItem
     Q_PROPERTY(qreal dashOffset READ dashOffset WRITE setDashOffset NOTIFY dashOffsetChanged)
     Q_PROPERTY(QVector<qreal> dashPattern READ dashPattern WRITE setDashPattern NOTIFY dashPatternChanged)
     Q_PROPERTY(bool cosmeticStroke READ isCosmeticStroke WRITE setCosmeticStroke NOTIFY cosmeticStrokeChanged)
+
+    Q_PROPERTY(QQmlListProperty<QObject> commands READ commands)
+    Q_CLASSINFO("DefaultProperty", "commands")
 
 public:
     enum FillRule {
@@ -192,6 +163,8 @@ public:
 
     bool isCosmeticStroke() const;
     void setCosmeticStroke(bool cosmetic);
+
+    QQmlListProperty<QObject> commands();
 
 protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;

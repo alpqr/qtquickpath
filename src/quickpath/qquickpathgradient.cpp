@@ -34,43 +34,53 @@
 **
 ****************************************************************************/
 
-#include <QtQml/qqmlextensionplugin.h>
-#include <QtQml/qqml.h>
-#include <QtQuickPath/private/qquickpathitem_p.h>
-#include <QtQuickPath/private/qquickpathgradient_p.h>
-#include <QtQuickPath/private/qquickpathcommand_p.h>
-#include <QtQuickPath/private/qquicklineitem_p.h>
-#include <QtQuickPath/private/qquickellipseitem_p.h>
-
-static void initResources()
-{
-#ifdef QT_STATIC
-    Q_INIT_RESOURCE(qmake_QtQuick_Path)
-#endif
-}
+#include "qquickpathgradient_p.h"
 
 QT_BEGIN_NAMESPACE
 
-class QmlPathPlugin : public QQmlExtensionPlugin
+QQuickPathGradientStop::QQuickPathGradientStop(QObject *parent)
+    : QObject(parent),
+      m_position(0),
+      m_color(Qt::black)
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
+}
 
-public:
-    QmlPathPlugin(QObject *parent = 0) : QQmlExtensionPlugin(parent) { initResources(); }
-    void registerTypes(const char *uri) override
-    {
-        Q_ASSERT(QLatin1String(uri) == QLatin1String("QtQuick.PathItem"));
-        qmlRegisterType<QQuickPathItem>(uri, 2, 0, "PathItem");
-        qmlRegisterType<QQuickPathGradientStop>(uri, 2, 0, "PathGradientStop");
-        qmlRegisterType<QQuickPathGradient>(uri, 2, 0, "PathGradient");
-        qmlRegisterType<QQuickPathMoveTo>(uri, 2, 0, "MoveTo");
-        qmlRegisterType<QQuickPathLineTo>(uri, 2, 0, "LineTo");
-        qmlRegisterType<QQuickLineItem>(uri, 2, 0, "LineItem");
-        qmlRegisterType<QQuickEllipseItem>(uri, 2, 0, "EllipseItem");
+qreal QQuickPathGradientStop::position() const
+{
+    return m_position;
+}
+
+void QQuickPathGradientStop::setPosition(qreal position)
+{
+    if (m_position != position) {
+        m_position = position;
+        if (QQuickPathGradient *grad = qobject_cast<QQuickPathGradient *>(parent()))
+            emit grad->updated();
     }
-};
+}
+
+QColor QQuickPathGradientStop::color() const
+{
+    return m_color;
+}
+
+void QQuickPathGradientStop::setColor(const QColor &color)
+{
+    if (m_color != color) {
+        m_color = color;
+        if (QQuickPathGradient *grad = qobject_cast<QQuickPathGradient *>(parent()))
+            emit grad->updated();
+    }
+}
+
+QQuickPathGradient::QQuickPathGradient(QObject *parent)
+    : QObject(parent)
+{
+}
+
+QQmlListProperty<QQuickPathGradientStop> QQuickPathGradient::stops()
+{
+    return QQmlListProperty<QQuickPathGradientStop>(this, m_stops);
+}
 
 QT_END_NAMESPACE
-
-#include "plugin.moc"
