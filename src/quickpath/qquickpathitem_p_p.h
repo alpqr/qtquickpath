@@ -68,7 +68,8 @@ public:
           capStyle(QQuickPathItem::SquareCap),
           strokeStyle(QQuickPathItem::SolidLine),
           dashOffset(0),
-          cosmeticStroke(false)
+          cosmeticStroke(false),
+          fillGradient(nullptr)
     {
         dashPattern << 4 << 2; // 4 * strokeWidth dash followed by 2 * strokeWidth space
     }
@@ -99,6 +100,7 @@ public:
     qreal dashOffset;
     QVector<qreal> dashPattern;
     bool cosmeticStroke;
+    QQuickPathGradient *fillGradient;
 };
 
 QT_END_NAMESPACE

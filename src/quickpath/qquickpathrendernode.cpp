@@ -120,7 +120,7 @@ void QQuickPathRenderer::setPath(const QPainterPath &path)
     m_needsNewGeom = true;
 }
 
-void QQuickPathRenderer::setFillColor(const QColor &color)
+void QQuickPathRenderer::setFillColor(const QColor &color, QQuickPathGradient *gradient)
 {
     m_fillColor = colorToColor4ub(color);
     m_needsNewColor = true;

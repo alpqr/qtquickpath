@@ -93,7 +93,7 @@ QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
     if (dirty & QQuickPathItemPrivate::DirtyPath)
         renderer->setPath(path);
     if (dirty & QQuickPathItemPrivate::DirtyFillColor)
-        renderer->setFillColor(fillColor);
+        renderer->setFillColor(fillColor, fillGradient);
     if (dirty & QQuickPathItemPrivate::DirtyStrokeColor)
         renderer->setStrokeColor(strokeColor);
     if (dirty & QQuickPathItemPrivate::DirtyStrokeWidth)
@@ -239,6 +239,25 @@ void QQuickPathItem::setFillColor(const QColor &color)
     }
 }
 
+QQuickPathGradient *QQuickPathItem::fillGradient() const
+{
+    return d->fillGradient;
+}
+
+void QQuickPathItem::setFillGradient(QQuickPathGradient *gradient)
+{
+    if (d->fillGradient != gradient) {
+        d->fillGradient = gradient;
+        d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
+        update();
+    }
+}
+
+void QQuickPathItem::resetFillGradient()
+{
+    setFillGradient(nullptr);
+}
+
 QColor QQuickPathItem::strokeColor() const
 {
     return d->strokeColor;
@@ -372,6 +391,43 @@ void QQuickPathItem::setCosmeticStroke(bool cosmetic)
         emit cosmeticStrokeChanged();
         update();
     }
+}
+
+QQuickPathGradientStop::QQuickPathGradientStop(QObject *parent)
+    : QObject(parent),
+      m_position(0),
+      m_color(Qt::black)
+{
+}
+
+qreal QQuickPathGradientStop::position() const
+{
+    return m_position;
+}
+
+void QQuickPathGradientStop::setPosition(qreal position)
+{
+    m_position = position;
+}
+
+QColor QQuickPathGradientStop::color() const
+{
+    return m_color;
+}
+
+void QQuickPathGradientStop::setColor(const QColor &color)
+{
+    m_color = color;
+}
+
+QQuickPathGradient::QQuickPathGradient(QObject *parent)
+    : QObject(parent)
+{
+}
+
+QQmlListProperty<QQuickPathGradientStop> QQuickPathGradient::stops()
+{
+    return QQmlListProperty<QQuickPathGradientStop>(this, m_stops);
 }
 
 QT_END_NAMESPACE

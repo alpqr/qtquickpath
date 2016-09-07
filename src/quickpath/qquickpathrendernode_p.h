@@ -65,7 +65,7 @@ public:
 
     void beginSync() override;
     void setPath(const QPainterPath &path) override;
-    void setFillColor(const QColor &color) override;
+    void setFillColor(const QColor &color, QQuickPathGradient *gradient) override;
     void setStrokeColor(const QColor &color) override;
     void setStrokeWidth(qreal w) override;
     void setFlags(RenderFlags flags) override;

@@ -66,7 +66,7 @@ public:
 
     virtual void beginSync() = 0;
     virtual void setPath(const QPainterPath &path) = 0;
-    virtual void setFillColor(const QColor &color) = 0;
+    virtual void setFillColor(const QColor &color, QQuickPathGradient *gradient) = 0;
     virtual void setStrokeColor(const QColor &color) = 0;
     virtual void setStrokeWidth(qreal w) = 0;
     virtual void setFlags(RenderFlags flags) = 0;

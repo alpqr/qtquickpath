@@ -177,7 +177,7 @@ void QNvprPathRenderer::setPath(const QPainterPath &path)
     // ###
 }
 
-void QNvprPathRenderer::setFillColor(const QColor &color)
+void QNvprPathRenderer::setFillColor(const QColor &color, QQuickPathGradient *gradient)
 {
 }
 

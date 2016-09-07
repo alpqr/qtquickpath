@@ -55,10 +55,46 @@ QT_BEGIN_NAMESPACE
 
 class QQuickPathItemPrivate;
 
+class QQUICKPATH_EXPORT QQuickPathGradientStop : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal position READ position WRITE setPosition)
+    Q_PROPERTY(QColor color READ color WRITE setColor)
+
+public:
+    QQuickPathGradientStop(QObject *parent = nullptr);
+
+    qreal position() const;
+    void setPosition(qreal position);
+
+    QColor color() const;
+    void setColor(const QColor &color);
+
+private:
+    qreal m_position;
+    QColor m_color;
+};
+
+class QQUICKPATH_EXPORT QQuickPathGradient : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(QQmlListProperty<QQuickPathGradientStop> stops READ stops)
+    Q_CLASSINFO("DefaultProperty", "stops")
+
+public:
+    QQuickPathGradient(QObject *parent = nullptr);
+
+    QQmlListProperty<QQuickPathGradientStop> stops();
+
+private:
+    QList<QQuickPathGradientStop *> m_stops;
+};
+
 class QQUICKPATH_EXPORT QQuickPathItem : public QQuickItem
 {
     Q_OBJECT
     Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor NOTIFY fillColorChanged)
+    Q_PROPERTY(QQuickPathGradient *fillGradient READ fillGradient WRITE setFillGradient RESET resetFillGradient)
     Q_PROPERTY(FillRule fillRule READ fillRule WRITE setFillRule NOTIFY fillRuleChanged)
     Q_PROPERTY(QColor strokeColor READ strokeColor WRITE setStrokeColor NOTIFY strokeColorChanged)
     Q_PROPERTY(qreal strokeWidth READ strokeWidth WRITE setStrokeWidth NOTIFY strokeWidthChanged)
@@ -122,6 +158,10 @@ public:
 
     QColor fillColor() const;
     void setFillColor(const QColor &color);
+
+    QQuickPathGradient *fillGradient() const;
+    void setFillGradient(QQuickPathGradient *gradient);
+    void resetFillGradient();
 
     FillRule fillRule() const;
     void setFillRule(FillRule fillRule);
