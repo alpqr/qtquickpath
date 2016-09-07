@@ -78,9 +78,22 @@ QQuickPathGradient::QQuickPathGradient(QObject *parent)
 {
 }
 
-QQmlListProperty<QQuickPathGradientStop> QQuickPathGradient::stops()
+void QQuickPathGradient::appendStop(QQmlListProperty<QObject> *list, QObject *stop)
 {
-    return QQmlListProperty<QQuickPathGradientStop>(this, m_stops);
+    QQuickPathGradientStop *sstop = qobject_cast<QQuickPathGradientStop *>(stop);
+    if (!sstop) {
+        qWarning("Gradient stop list only supports QQuickPathGradientStop elements");
+        return;
+    }
+    QQuickPathGradient *grad = qobject_cast<QQuickPathGradient *>(list->object);
+    Q_ASSERT(grad);
+    sstop->setParent(grad);
+    grad->m_stops.append(sstop);
+}
+
+QQmlListProperty<QObject> QQuickPathGradient::stops()
+{
+    return QQmlListProperty<QObject>(this, nullptr, &QQuickPathGradient::appendStop, nullptr, nullptr, nullptr);
 }
 
 QT_END_NAMESPACE

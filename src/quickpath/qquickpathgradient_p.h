@@ -76,19 +76,21 @@ private:
 class QQUICKPATH_EXPORT QQuickPathGradient : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QQmlListProperty<QQuickPathGradientStop> stops READ stops)
+    Q_PROPERTY(QQmlListProperty<QObject> stops READ stops)
     Q_CLASSINFO("DefaultProperty", "stops")
 
 public:
     QQuickPathGradient(QObject *parent = nullptr);
 
-    QQmlListProperty<QQuickPathGradientStop> stops();
+    QQmlListProperty<QObject> stops();
 
 signals:
     void updated();
 
 private:
-    QList<QQuickPathGradientStop *> m_stops;
+    static void appendStop(QQmlListProperty<QObject> *list, QObject *stop);
+
+    QVector<QObject *> m_stops;
 };
 
 QT_END_NAMESPACE
