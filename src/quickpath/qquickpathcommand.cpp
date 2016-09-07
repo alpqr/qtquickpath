@@ -62,6 +62,7 @@ void QQuickPathMoveTo::setX(qreal v)
 {
     if (m_x != v) {
         m_x = v;
+        emit xChanged();
         UPDATE_PATH_ITEM();
     }
 }
@@ -75,6 +76,7 @@ void QQuickPathMoveTo::setY(qreal v)
 {
     if (m_y != v) {
         m_y = v;
+        emit yChanged();
         UPDATE_PATH_ITEM();
     }
 }
@@ -100,6 +102,7 @@ void QQuickPathLineTo::setX(qreal v)
 {
     if (m_x != v) {
         m_x = v;
+        emit xChanged();
         UPDATE_PATH_ITEM();
     }
 }
@@ -113,6 +116,7 @@ void QQuickPathLineTo::setY(qreal v)
 {
     if (m_y != v) {
         m_y = v;
+        emit yChanged();
         UPDATE_PATH_ITEM();
     }
 }
@@ -120,6 +124,76 @@ void QQuickPathLineTo::setY(qreal v)
 void QQuickPathLineTo::addToPath(QPainterPath *path)
 {
     path->lineTo(m_x, m_y);
+}
+
+QQuickPathEllipse::QQuickPathEllipse(QObject *parent)
+    : QQuickPathCommand(parent),
+      m_centerX(0),
+      m_centerY(0),
+      m_radiusX(0),
+      m_radiusY(0)
+{
+}
+
+qreal QQuickPathEllipse::centerX() const
+{
+    return m_centerX;
+}
+
+void QQuickPathEllipse::setCenterX(qreal v)
+{
+    if (m_centerX != v) {
+        m_centerX = v;
+        emit centerXChanged();
+        UPDATE_PATH_ITEM();
+    }
+}
+
+qreal QQuickPathEllipse::centerY() const
+{
+    return m_centerY;
+}
+
+void QQuickPathEllipse::setCenterY(qreal v)
+{
+    if (m_centerY != v) {
+        m_centerY = v;
+        emit centerYChanged();
+        UPDATE_PATH_ITEM();
+    }
+}
+
+qreal QQuickPathEllipse::radiusX() const
+{
+    return m_radiusX;
+}
+
+void QQuickPathEllipse::setRadiusX(qreal v)
+{
+    if (m_radiusX != v) {
+        m_radiusX = v;
+        emit radiusXChanged();
+        UPDATE_PATH_ITEM();
+    }
+}
+
+qreal QQuickPathEllipse::radiusY() const
+{
+    return m_radiusY;
+}
+
+void QQuickPathEllipse::setRadiusY(qreal v)
+{
+    if (m_radiusY != v) {
+        m_radiusY = v;
+        emit radiusYChanged();
+        UPDATE_PATH_ITEM();
+    }
+}
+
+void QQuickPathEllipse::addToPath(QPainterPath *path)
+{
+    path->addEllipse(QPointF(m_centerX, m_centerY), m_radiusX, m_radiusY);
 }
 
 QT_END_NAMESPACE

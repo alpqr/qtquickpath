@@ -222,27 +222,30 @@ Item {
         }
     }
 
-    EllipseItem {
+    PathItem {
         id: ellipse
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 50
         width: 100
         height: 100
-        centerX: 50
-        centerY: 50
-        radiusX: 40
-        radiusY: 20
-        borderWidth: 5
-        borderColor: "yellow"
+        strokeWidth: 5
+        strokeColor: "yellow"
         property bool fillEnabled: false
         fillColor: fillEnabled ? "green" : "transparent"
-        Timer {
-            interval: 1000
-            running: true
-            repeat: true
-            onTriggered: ellipse.borderWidth = (ellipse.borderWidth > 0 ? 0 : 5)
+
+        Ellipse {
+            centerX: 50
+            centerY: 50
+            radiusX: 40
+            radiusY: 20
         }
+    }
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: ellipse.strokeWidth = (ellipse.strokeWidth > 0 ? 0 : 5)
     }
 
     MouseArea {

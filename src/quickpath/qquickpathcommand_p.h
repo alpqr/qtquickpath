@@ -114,6 +114,42 @@ private:
     qreal m_y;
 };
 
+class QQUICKPATH_EXPORT QQuickPathEllipse : public QQuickPathCommand
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal centerX READ centerX WRITE setCenterX NOTIFY centerXChanged)
+    Q_PROPERTY(qreal centerY READ centerY WRITE setCenterY NOTIFY centerYChanged)
+    Q_PROPERTY(qreal radiusX READ radiusX WRITE setRadiusX NOTIFY radiusXChanged)
+    Q_PROPERTY(qreal radiusY READ radiusY WRITE setRadiusY NOTIFY radiusYChanged)
+
+public:
+    QQuickPathEllipse(QObject *parent = nullptr);
+
+    qreal centerX() const;
+    void setCenterX(qreal v);
+    qreal centerY() const;
+    void setCenterY(qreal v);
+
+    qreal radiusX() const;
+    void setRadiusX(qreal v);
+    qreal radiusY() const;
+    void setRadiusY(qreal v);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void centerXChanged();
+    void centerYChanged();
+    void radiusXChanged();
+    void radiusYChanged();
+
+private:
+    qreal m_centerX;
+    qreal m_centerY;
+    qreal m_radiusX;
+    qreal m_radiusY;
+};
+
 QT_END_NAMESPACE
 
 #endif

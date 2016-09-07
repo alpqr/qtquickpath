@@ -39,8 +39,6 @@
 #include <QtQuickPath/private/qquickpathitem_p.h>
 #include <QtQuickPath/private/qquickpathgradient_p.h>
 #include <QtQuickPath/private/qquickpathcommand_p.h>
-#include <QtQuickPath/private/qquicklineitem_p.h>
-#include <QtQuickPath/private/qquickellipseitem_p.h>
 
 static void initResources()
 {
@@ -66,8 +64,7 @@ public:
         qmlRegisterType<QQuickPathGradient>(uri, 2, 0, "PathGradient");
         qmlRegisterType<QQuickPathMoveTo>(uri, 2, 0, "MoveTo");
         qmlRegisterType<QQuickPathLineTo>(uri, 2, 0, "LineTo");
-        qmlRegisterType<QQuickLineItem>(uri, 2, 0, "LineItem");
-        qmlRegisterType<QQuickEllipseItem>(uri, 2, 0, "EllipseItem");
+        qmlRegisterType<QQuickPathEllipse>(uri, 2, 0, "Ellipse");
     }
 };
 
