@@ -1,0 +1,16 @@
+
+- declarative command API
+
+- linear gradient for filling
+  + like GL paint engine but generate color table via GL?
+
+- When QQuickItem::antialiasing() is true, do something smart, like QQuickRectangle
+  (multisampling on the entire window is not necessarily affordable)
+
+- other gradients
+
+- NVPR
+
+- demo app with QuickControls2 and perf comparision (canvas/painteditem vs. paths)
+
+- examples, tests, etc.
