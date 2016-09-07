@@ -118,7 +118,8 @@ Item {
             strokeColor: "blue"
             fillColor: "lightGray"
             strokeWidth: 2
-            strokeStyle: PathItem.DotLine
+            strokeStyle: PathItem.DashLine
+            dashPattern: [ 1, 4 ]
             function draw() {
                 moveTo(20, 30);
                 cubicTo(80, 0, 50, 50, 80, 80);

@@ -66,8 +66,11 @@ public:
           joinStyle(QQuickPathItem::BevelJoin),
           miterLimit(2),
           capStyle(QQuickPathItem::SquareCap),
-          strokeStyle(QQuickPathItem::SolidLine)
-    { }
+          strokeStyle(QQuickPathItem::SolidLine),
+          dashOffset(0)
+    {
+        dashPattern << 4 << 2; // 4 * strokeWidth dash followed by 2 * strokeWidth space
+    }
     ~QQuickPathItemPrivate() { delete renderer; }
 
     QSGNode *updatePaintNode(QQuickItem *item, QSGNode *node);
@@ -92,6 +95,8 @@ public:
     int miterLimit;
     QQuickPathItem::CapStyle capStyle;
     QQuickPathItem::StrokeStyle strokeStyle;
+    qreal dashOffset;
+    QVector<qreal> dashPattern;
 };
 
 QT_END_NAMESPACE

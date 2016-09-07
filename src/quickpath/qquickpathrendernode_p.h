@@ -71,7 +71,8 @@ public:
     void setFlags(RenderFlags flags) override;
     void setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit) override;
     void setCapStyle(QQuickPathItem::CapStyle capStyle) override;
-    void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle) override;
+    void setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
+                        qreal dashOffset, const QVector<qreal> &dashPattern) override;
     void endSync() override;
 
     struct Color4ub { unsigned char r, g, b, a; };

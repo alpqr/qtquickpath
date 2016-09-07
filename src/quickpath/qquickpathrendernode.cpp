@@ -187,7 +187,8 @@ void QQuickPathRenderer::setCapStyle(QQuickPathItem::CapStyle capStyle)
     m_needsNewGeom = true;
 }
 
-void QQuickPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle)
+void QQuickPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
+                                        qreal dashOffset, const QVector<qreal> &dashPattern)
 {
     m_pen.setStyle(Qt::PenStyle(strokeStyle));
     m_needsNewGeom = true;

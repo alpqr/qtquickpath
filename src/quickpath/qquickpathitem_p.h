@@ -66,6 +66,8 @@ class QQUICKPATH_EXPORT QQuickPathItem : public QQuickItem
     Q_PROPERTY(int miterLimit READ miterLimit WRITE setMiterLimit NOTIFY miterLimitChanged)
     Q_PROPERTY(CapStyle capStyle READ capStyle WRITE setCapStyle NOTIFY capStyleChanged)
     Q_PROPERTY(StrokeStyle strokeStyle READ strokeStyle WRITE setStrokeStyle NOTIFY strokeStyleChanged)
+    Q_PROPERTY(qreal dashOffset READ dashOffset WRITE setDashOffset NOTIFY dashOffsetChanged)
+    Q_PROPERTY(QVector<qreal> dashPattern READ dashPattern WRITE setDashPattern NOTIFY dashPatternChanged)
 
 public:
     enum FillRule {
@@ -90,8 +92,7 @@ public:
 
     enum StrokeStyle {
         SolidLine = Qt::SolidLine,
-        DashLine = Qt::DashLine,
-        DotLine = Qt::DotLine
+        DashLine = Qt::DashLine
     };
     Q_ENUM(StrokeStyle)
 
@@ -142,6 +143,12 @@ public:
     StrokeStyle strokeStyle() const;
     void setStrokeStyle(StrokeStyle style);
 
+    qreal dashOffset() const;
+    void setDashOffset(qreal offset);
+
+    QVector<qreal> dashPattern() const;
+    void setDashPattern(const QVector<qreal> &array);
+
 protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
 
@@ -154,6 +161,8 @@ signals:
     void miterLimitChanged();
     void capStyleChanged();
     void strokeStyleChanged();
+    void dashOffsetChanged();
+    void dashPatternChanged();
 
 private:
     QQuickPathItemPrivate *d;
