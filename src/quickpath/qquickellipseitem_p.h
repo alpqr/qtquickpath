@@ -49,11 +49,9 @@
 //
 
 #include <QtQuickPath/qtquickpathglobal.h>
-#include <QQuickItem>
+#include "qquickpathitem_p.h"
 
 QT_BEGIN_NAMESPACE
-
-class QQuickPathItemPrivate;
 
 class QQUICKPATH_EXPORT QQuickEllipseItem : public QQuickItem
 {
@@ -63,6 +61,7 @@ class QQUICKPATH_EXPORT QQuickEllipseItem : public QQuickItem
     Q_PROPERTY(qreal radiusX READ radiusX WRITE setRadiusX NOTIFY radiusXChanged)
     Q_PROPERTY(qreal radiusY READ radiusY WRITE setRadiusY NOTIFY radiusYChanged)
     Q_PROPERTY(QColor fillColor READ fillColor WRITE setFillColor NOTIFY fillColorChanged)
+    Q_PROPERTY(QQuickPathGradient *fillGradient READ fillGradient WRITE setFillGradient RESET resetFillGradient)
     Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor NOTIFY borderColorChanged)
     Q_PROPERTY(qreal borderWidth READ borderWidth WRITE setBorderWidth NOTIFY borderWidthChanged)
 
@@ -82,6 +81,10 @@ public:
 
     QColor fillColor() const;
     void setFillColor(const QColor &color);
+
+    QQuickPathGradient *fillGradient() const;
+    void setFillGradient(QQuickPathGradient *gradient);
+    void resetFillGradient();
 
     QColor borderColor() const;
     void setBorderColor(const QColor &color);

@@ -132,6 +132,27 @@ void QQuickEllipseItem::setFillColor(const QColor &color)
     }
 }
 
+QQuickPathGradient *QQuickEllipseItem::fillGradient() const
+{
+    Q_D(const QQuickPathItem);
+    return d->fillGradient;
+}
+
+void QQuickEllipseItem::setFillGradient(QQuickPathGradient *gradient)
+{
+    Q_D(QQuickPathItem);
+    if (d->fillGradient != gradient) {
+        d->fillGradient = gradient;
+        d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
+        update();
+    }
+}
+
+void QQuickEllipseItem::resetFillGradient()
+{
+    setFillGradient(nullptr);
+}
+
 QColor QQuickEllipseItem::borderColor() const
 {
     Q_D(const QQuickPathItem);
