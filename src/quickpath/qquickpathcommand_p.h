@@ -114,6 +114,186 @@ private:
     qreal m_y;
 };
 
+class QQUICKPATH_EXPORT QQuickPathArcMoveTo : public QQuickPathCommand
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal x READ x WRITE setX NOTIFY xChanged)
+    Q_PROPERTY(qreal y READ y WRITE setY NOTIFY yChanged)
+    Q_PROPERTY(qreal width READ width WRITE setWidth NOTIFY widthChanged)
+    Q_PROPERTY(qreal height READ height WRITE setHeight NOTIFY heightChanged)
+    Q_PROPERTY(qreal angle READ angle WRITE setAngle NOTIFY angleChanged)
+
+public:
+    QQuickPathArcMoveTo(QObject *parent = nullptr);
+
+    qreal x() const;
+    void setX(qreal v);
+    qreal y() const;
+    void setY(qreal v);
+
+    qreal width() const;
+    void setWidth(qreal w);
+    qreal height() const;
+    void setHeight(qreal h);
+
+    qreal angle() const;
+    void setAngle(qreal v);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void xChanged();
+    void yChanged();
+    void widthChanged();
+    void heightChanged();
+    void angleChanged();
+
+private:
+    qreal m_x;
+    qreal m_y;
+    qreal m_width;
+    qreal m_height;
+    qreal m_angle;
+};
+
+class QQUICKPATH_EXPORT QQuickPathArcTo : public QQuickPathCommand
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal x READ x WRITE setX NOTIFY xChanged)
+    Q_PROPERTY(qreal y READ y WRITE setY NOTIFY yChanged)
+    Q_PROPERTY(qreal width READ width WRITE setWidth NOTIFY widthChanged)
+    Q_PROPERTY(qreal height READ height WRITE setHeight NOTIFY heightChanged)
+    Q_PROPERTY(qreal startAngle READ startAngle WRITE setStartAngle NOTIFY startAngleChanged)
+    Q_PROPERTY(qreal arcLength READ arcLength WRITE setArcLength NOTIFY arcLengthChanged)
+
+public:
+    QQuickPathArcTo(QObject *parent = nullptr);
+
+    qreal x() const;
+    void setX(qreal v);
+    qreal y() const;
+    void setY(qreal v);
+
+    qreal width() const;
+    void setWidth(qreal w);
+    qreal height() const;
+    void setHeight(qreal h);
+
+    qreal startAngle() const;
+    void setStartAngle(qreal v);
+
+    qreal arcLength() const;
+    void setArcLength(qreal length);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void xChanged();
+    void yChanged();
+    void widthChanged();
+    void heightChanged();
+    void startAngleChanged();
+    void arcLengthChanged();
+
+private:
+    qreal m_x;
+    qreal m_y;
+    qreal m_width;
+    qreal m_height;
+    qreal m_startAngle;
+    qreal m_arcLength;
+};
+
+class QQUICKPATH_EXPORT QQuickPathCubicTo : public QQuickPathCommand
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal cx1 READ cx1 WRITE setCx1 NOTIFY cx1Changed)
+    Q_PROPERTY(qreal cy1 READ cy1 WRITE setCy1 NOTIFY cy1Changed)
+    Q_PROPERTY(qreal cx2 READ cx2 WRITE setCx2 NOTIFY cx2Changed)
+    Q_PROPERTY(qreal cy2 READ cy2 WRITE setCy2 NOTIFY cy2Changed)
+    Q_PROPERTY(qreal ex READ ex WRITE setEx NOTIFY eXChanged)
+    Q_PROPERTY(qreal ey READ ey WRITE setEy NOTIFY eYChanged)
+
+public:
+    QQuickPathCubicTo(QObject *parent = nullptr);
+
+    qreal cx1() const;
+    void setCx1(qreal v);
+    qreal cy1() const;
+    void setCy1(qreal v);
+    qreal cx2() const;
+    void setCx2(qreal v);
+    qreal cy2() const;
+    void setCy2(qreal v);
+    qreal ex() const;
+    void setEx(qreal w);
+    qreal ey() const;
+    void setEy(qreal h);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void cx1Changed();
+    void cy1Changed();
+    void cx2Changed();
+    void cy2Changed();
+    void eXChanged();
+    void eYChanged();
+
+private:
+    qreal m_cx1;
+    qreal m_cy1;
+    qreal m_cx2;
+    qreal m_cy2;
+    qreal m_ex;
+    qreal m_ey;
+};
+
+class QQUICKPATH_EXPORT QQuickPathQuadTo : public QQuickPathCommand
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal cx READ cx WRITE setCx NOTIFY cXChanged)
+    Q_PROPERTY(qreal cy READ cy WRITE setCy NOTIFY cYChanged)
+    Q_PROPERTY(qreal ex READ ex WRITE setEx NOTIFY eXChanged)
+    Q_PROPERTY(qreal ey READ ey WRITE setEy NOTIFY eYChanged)
+
+public:
+    QQuickPathQuadTo(QObject *parent = nullptr);
+
+    qreal cx() const;
+    void setCx(qreal v);
+    qreal cy() const;
+    void setCy(qreal v);
+    qreal ex() const;
+    void setEx(qreal w);
+    qreal ey() const;
+    void setEy(qreal h);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void cXChanged();
+    void cYChanged();
+    void eXChanged();
+    void eYChanged();
+
+private:
+    qreal m_cx;
+    qreal m_cy;
+    qreal m_ex;
+    qreal m_ey;
+};
+
+class QQUICKPATH_EXPORT QQuickPathClose : public QQuickPathCommand
+{
+    Q_OBJECT
+
+public:
+    QQuickPathClose(QObject *parent = nullptr);
+
+    void addToPath(QPainterPath *path) override;
+};
+
 class QQUICKPATH_EXPORT QQuickPathEllipse : public QQuickPathCommand
 {
     Q_OBJECT
@@ -146,6 +326,67 @@ signals:
 private:
     qreal m_centerX;
     qreal m_centerY;
+    qreal m_radiusX;
+    qreal m_radiusY;
+};
+
+class QQUICKPATH_EXPORT QQuickPathRectangle : public QQuickPathCommand
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal x READ x WRITE setX NOTIFY xChanged)
+    Q_PROPERTY(qreal y READ y WRITE setY NOTIFY yChanged)
+    Q_PROPERTY(qreal width READ width WRITE setWidth NOTIFY widthChanged)
+    Q_PROPERTY(qreal height READ height WRITE setHeight NOTIFY heightChanged)
+
+public:
+    QQuickPathRectangle(QObject *parent = nullptr);
+
+    qreal x() const;
+    void setX(qreal v);
+    qreal y() const;
+    void setY(qreal v);
+
+    qreal width() const;
+    void setWidth(qreal w);
+    qreal height() const;
+    void setHeight(qreal h);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void xChanged();
+    void yChanged();
+    void widthChanged();
+    void heightChanged();
+
+private:
+    qreal m_x;
+    qreal m_y;
+    qreal m_width;
+    qreal m_height;
+};
+
+class QQUICKPATH_EXPORT QQuickPathRoundedRectangle : public QQuickPathRectangle
+{
+    Q_OBJECT
+    Q_PROPERTY(qreal radiusX READ radiusX WRITE setRadiusX NOTIFY radiusXChanged)
+    Q_PROPERTY(qreal radiusY READ radiusY WRITE setRadiusY NOTIFY radiusYChanged)
+
+public:
+    QQuickPathRoundedRectangle(QObject *parent = nullptr);
+
+    qreal radiusX() const;
+    void setRadiusX(qreal v);
+    qreal radiusY() const;
+    void setRadiusY(qreal v);
+
+    void addToPath(QPainterPath *path) override;
+
+signals:
+    void radiusXChanged();
+    void radiusYChanged();
+
+private:
     qreal m_radiusX;
     qreal m_radiusY;
 };

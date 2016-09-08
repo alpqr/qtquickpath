@@ -64,7 +64,13 @@ public:
         qmlRegisterType<QQuickPathGradient>(uri, 2, 0, "PathGradient");
         qmlRegisterType<QQuickPathMoveTo>(uri, 2, 0, "MoveTo");
         qmlRegisterType<QQuickPathLineTo>(uri, 2, 0, "LineTo");
-        qmlRegisterType<QQuickPathEllipse>(uri, 2, 0, "Ellipse");
+        qmlRegisterType<QQuickPathArcMoveTo>(uri, 2, 0, "ArcMoveTo");
+        qmlRegisterType<QQuickPathArcTo>(uri, 2, 0, "ArcTo");
+        qmlRegisterType<QQuickPathCubicTo>(uri, 2, 0, "CubicTo");
+        qmlRegisterType<QQuickPathQuadTo>(uri, 2, 0, "QuadTo");
+        qmlRegisterType<QQuickPathEllipse>(uri, 2, 0, "PathEllipse");
+        qmlRegisterType<QQuickPathRectangle>(uri, 2, 0, "PathRectangle");
+        qmlRegisterType<QQuickPathRoundedRectangle>(uri, 2, 0, "PathRoundedRectangle");
     }
 };
 

@@ -1,7 +1,4 @@
 
-- declarative command API
-  + count/at/etc. for the commands and gradient properties?
-
 - linear gradient for filling
   + like GL paint engine but generate color table via GL?
 

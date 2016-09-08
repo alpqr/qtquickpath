@@ -222,23 +222,33 @@ Item {
         }
     }
 
-    PathItem {
-        id: ellipse
+    Column {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: 50
-        width: 100
-        height: 100
-        strokeWidth: 5
-        strokeColor: "yellow"
-        property bool fillEnabled: false
-        fillColor: fillEnabled ? "green" : "transparent"
 
-        Ellipse {
-            centerX: 50
-            centerY: 50
-            radiusX: 40
-            radiusY: 20
+        PathItem {
+            width: 100
+            height: 100
+            MoveTo { x: 20; y: 30 }
+            CubicTo { cx1: 80; cy1: 0; cx2: 50; cy2: 50; ex: 80; ey: 80 }
+        }
+
+        PathItem {
+            id: ellipse
+            width: 100
+            height: 100
+            strokeWidth: 5
+            strokeColor: "yellow"
+            property bool fillEnabled: false
+            fillColor: fillEnabled ? "green" : "transparent"
+
+            PathEllipse {
+                centerX: 50
+                centerY: 50
+                radiusX: 40
+                radiusY: 20
+            }
         }
     }
     Timer {
