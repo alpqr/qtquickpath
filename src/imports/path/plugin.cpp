@@ -68,6 +68,7 @@ public:
         qmlRegisterType<QQuickPathArcTo>(uri, 2, 0, "ArcTo");
         qmlRegisterType<QQuickPathCubicTo>(uri, 2, 0, "CubicTo");
         qmlRegisterType<QQuickPathQuadTo>(uri, 2, 0, "QuadTo");
+        qmlRegisterType<QQuickPathClose>(uri, 2, 0, "ClosePath");
         qmlRegisterType<QQuickPathEllipse>(uri, 2, 0, "PathEllipse");
         qmlRegisterType<QQuickPathRectangle>(uri, 2, 0, "PathRectangle");
         qmlRegisterType<QQuickPathRoundedRectangle>(uri, 2, 0, "PathRoundedRectangle");

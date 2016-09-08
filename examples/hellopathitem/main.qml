@@ -231,7 +231,17 @@ Item {
             width: 100
             height: 100
             MoveTo { x: 20; y: 30 }
-            CubicTo { cx1: 80; cy1: 0; cx2: 50; cy2: 50; ex: 80; ey: 80 }
+            CubicTo { cy1: 0; cx2: 50; cy2: 50; ex: 80; ey: 80
+                      SequentialAnimation on cx1 {
+                          NumberAnimation { from: 0; to: 100; duration: 1000 }
+                          NumberAnimation { from: 100; to: 0; duration: 1000 }
+                          loops: Animation.Infinite
+                      }
+                    }
+            ClosePath { }
+            fillColor: "lightGray"
+            strokeColor: "green"
+            strokeWidth: 4
         }
 
         PathItem {
