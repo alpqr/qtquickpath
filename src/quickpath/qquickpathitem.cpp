@@ -218,10 +218,10 @@ void QQuickPathItem::addRoundedRect(qreal x, qreal y, qreal w, qreal h, qreal xr
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
-void QQuickPathItem::addEllipse(qreal x, qreal y, qreal rx, qreal ry)
+void QQuickPathItem::addEllipse(qreal x, qreal y, qreal w, qreal h)
 {
     Q_D(QQuickPathItem);
-    d->path.addEllipse(x, y, rx, ry);
+    d->path.addEllipse(x, y, w, h);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 

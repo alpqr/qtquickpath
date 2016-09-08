@@ -120,7 +120,7 @@ public:
 
     Q_INVOKABLE void addRect(qreal x, qreal y, qreal w, qreal h);
     Q_INVOKABLE void addRoundedRect(qreal x, qreal y, qreal w, qreal h, qreal xr, qreal yr);
-    Q_INVOKABLE void addEllipse(qreal x, qreal y, qreal rx, qreal ry);
+    Q_INVOKABLE void addEllipse(qreal x, qreal y, qreal w, qreal h);
     Q_INVOKABLE void addEllipseWithCenter(qreal cx, qreal cy, qreal rx, qreal ry);
 
     Q_INVOKABLE QPointF currentPosition() const;
