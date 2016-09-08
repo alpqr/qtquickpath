@@ -190,17 +190,17 @@ void QQuickPathItem::arcTo(qreal x, qreal y, qreal w, qreal h, qreal startAngle,
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
-void QQuickPathItem::cubicTo(qreal c1x, qreal c1y, qreal c2x, qreal c2y, qreal endX, qreal endY)
+void QQuickPathItem::cubicTo(qreal cx1, qreal cy1, qreal cx2, qreal cy2, qreal ex, qreal ey)
 {
     Q_D(QQuickPathItem);
-    d->path.cubicTo(c1x, c1y, c2x, c2y, endX, endY);
+    d->path.cubicTo(cx1, cy1, cx2, cy2, ex, ey);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 
-void QQuickPathItem::quadTo(qreal cX, qreal cY, qreal endX, qreal endY)
+void QQuickPathItem::quadTo(qreal cx, qreal cy, qreal ex, qreal ey)
 {
     Q_D(QQuickPathItem);
-    d->path.quadTo(cX, cY, endX, endY);
+    d->path.quadTo(cx, cy, ex, ey);
     d->dirty |= QQuickPathItemPrivate::DirtyPath;
 }
 

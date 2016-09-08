@@ -115,8 +115,8 @@ public:
     Q_INVOKABLE void lineTo(qreal x, qreal y);
     Q_INVOKABLE void arcMoveTo(qreal x, qreal y, qreal w, qreal h, qreal angle);
     Q_INVOKABLE void arcTo(qreal x, qreal y, qreal w, qreal h, qreal startAngle, qreal arcLength);
-    Q_INVOKABLE void cubicTo(qreal c1x, qreal c1y, qreal c2x, qreal c2y, qreal endX, qreal endY);
-    Q_INVOKABLE void quadTo(qreal cX, qreal cY, qreal endX, qreal endY);
+    Q_INVOKABLE void cubicTo(qreal cx1, qreal cy1, qreal cx2, qreal cy2, qreal ex, qreal ey);
+    Q_INVOKABLE void quadTo(qreal cx, qreal cy, qreal ex, qreal ey);
 
     Q_INVOKABLE void addRect(qreal x, qreal y, qreal w, qreal h);
     Q_INVOKABLE void addRoundedRect(qreal x, qreal y, qreal w, qreal h, qreal xr, qreal yr);
