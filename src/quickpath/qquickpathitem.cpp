@@ -187,10 +187,8 @@ QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
     // safely access gui thread data.
 
     Q_D(QQuickPathItem);
-    if (!node) {
+    if (!node)
         node = d->createRenderNode();
-        d->dirty |= 0xFFFF;
-    }
 
     if (d->renderer)
         d->renderer->updatePathRenderNode();
