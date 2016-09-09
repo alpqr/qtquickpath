@@ -172,6 +172,7 @@ public slots:
 protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
     void updatePolish() override;
+    void itemChange(ItemChange change, const ItemChangeData &data) override;
 
 signals:
     void fillColorChanged();

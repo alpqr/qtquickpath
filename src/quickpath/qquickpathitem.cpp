@@ -159,12 +159,26 @@ void QQuickPathItem::updatePolish()
     if (!d->dirty)
         return;
 
-    if (!d->renderer)
+    if (!d->renderer) {
         d->createRenderer();
+        if (!d->renderer)
+            return;
+    }
 
-    d->sync();
+    // endSync() is where expensive calculations may happen, depending on the
+    // backend. Therefore do this only when the item is visible.
+    if (isVisible())
+        d->sync();
 
     update();
+}
+
+void QQuickPathItem::itemChange(ItemChange change, const ItemChangeData &data)
+{
+    if (change == ItemVisibleHasChanged && data.boolValue)
+        updatePath();
+
+    QQuickItem::itemChange(change, data);
 }
 
 QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
