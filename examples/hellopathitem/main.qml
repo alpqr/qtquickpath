@@ -45,7 +45,7 @@ Item {
                 lineTo(0, ey);
                 closeSubPath();
                 addEllipseWithCenter(150, 150, 50, 50)
-                update()
+                updatePath()
             }
             SequentialAnimation on ex {
                 NumberAnimation {

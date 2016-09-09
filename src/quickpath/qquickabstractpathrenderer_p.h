@@ -64,6 +64,7 @@ public:
     };
     Q_DECLARE_FLAGS(RenderFlags, RenderFlag)
 
+    // Gui thread
     virtual void beginSync() = 0;
     virtual void setPath(const QPainterPath &path) = 0;
     virtual void setFillColor(const QColor &color, QQuickPathGradient *gradient) = 0;
@@ -76,6 +77,9 @@ public:
                                 qreal dashOffset, const QVector<qreal> &dashPattern,
                                 bool cosmeticStroke) = 0;
     virtual void endSync() = 0;
+
+    // Render thread
+    virtual void updatePathRenderNode() = 0;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QQuickAbstractPathRenderer::RenderFlags)

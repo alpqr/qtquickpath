@@ -81,7 +81,9 @@ public:
     static QQuickPathItemPrivate *get(QQuickPathItem *item) { return item->d_func(); }
     static void appendCommand(QQmlListProperty<QObject> *list, QObject *cmd);
     void handlePathCommandChange();
-    QSGNode *updatePaintNode(QQuickItem *item, QSGNode *node);
+    void createRenderer();
+    QSGNode *createRenderNode();
+    void sync();
 
     enum Dirty {
         DirtyPath = 0x01,

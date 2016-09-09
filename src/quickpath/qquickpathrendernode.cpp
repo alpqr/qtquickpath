@@ -74,17 +74,16 @@ static inline QQuickPathRenderer::Color4ub colorToColor4ub(const QColor &c)
     return color;
 }
 
-QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickItem *item, bool hasFill, bool hasStroke)
-    : m_item(item),
-      m_fillNode(nullptr),
+QQuickPathRootRenderNode::QQuickPathRootRenderNode(QQuickWindow *window, bool hasFill, bool hasStroke)
+    : m_fillNode(nullptr),
       m_strokeNode(nullptr)
 {
     if (hasFill) {
-        m_fillNode = new QQuickPathRenderNode(item);
+        m_fillNode = new QQuickPathRenderNode(window);
         appendChildNode(m_fillNode);
     }
     if (hasStroke) {
-        m_strokeNode = new QQuickPathRenderNode(item);
+        m_strokeNode = new QQuickPathRenderNode(window);
         appendChildNode(m_strokeNode);
     }
 }
@@ -93,14 +92,14 @@ QQuickPathRootRenderNode::~QQuickPathRootRenderNode()
 {
 }
 
-QQuickPathRenderNode::QQuickPathRenderNode(QQuickItem *item)
+QQuickPathRenderNode::QQuickPathRenderNode(QQuickWindow *window)
     : m_geometry(QSGGeometry::defaultAttributes_ColoredPoint2D(), 0, 0)
 {
     setGeometry(&m_geometry);
 
     // Use vertexcolor material. Items with different colors remain batchable
     // this way, at the expense of having to provide per-vertex color values.
-    m_material.reset(QQuickPathRenderMaterialFactory::createVertexColor(item->window()));
+    m_material.reset(QQuickPathRenderMaterialFactory::createVertexColor(window));
     setMaterial(m_material.data());
 }
 
@@ -110,51 +109,50 @@ QQuickPathRenderNode::~QQuickPathRenderNode()
 
 void QQuickPathRenderer::beginSync()
 {
-    m_needsNewGeom = false;
-    m_needsNewColor = false;
+    m_dirty = 0;
 }
 
 void QQuickPathRenderer::setPath(const QPainterPath &path)
 {
     m_path = path;
-    m_needsNewGeom = true;
+    m_dirty |= DirtyGeom;
 }
 
 void QQuickPathRenderer::setFillColor(const QColor &color, QQuickPathGradient *gradient)
 {
     m_fillColor = colorToColor4ub(color);
-    m_needsNewColor = true;
+    m_dirty |= DirtyColor;
 }
 
 void QQuickPathRenderer::setStrokeColor(const QColor &color)
 {
     m_strokeColor = colorToColor4ub(color);
-    m_needsNewColor = true;
+    m_dirty |= DirtyColor;
 }
 
 void QQuickPathRenderer::setStrokeWidth(qreal w)
 {
     m_pen.setWidthF(w);
-    m_needsNewGeom = true;
+    m_dirty |= DirtyGeom;
 }
 
 void QQuickPathRenderer::setFlags(RenderFlags flags)
 {
     m_flags = flags;
-    m_needsNewGeom = true;
+    m_dirty |= DirtyGeom;
 }
 
 void QQuickPathRenderer::setJoinStyle(QQuickPathItem::JoinStyle joinStyle, int miterLimit)
 {
     m_pen.setJoinStyle(Qt::PenJoinStyle(joinStyle));
     m_pen.setMiterLimit(miterLimit);
-    m_needsNewGeom = true;
+    m_dirty |= DirtyGeom;
 }
 
 void QQuickPathRenderer::setCapStyle(QQuickPathItem::CapStyle capStyle)
 {
     m_pen.setCapStyle(Qt::PenCapStyle(capStyle));
-    m_needsNewGeom = true;
+    m_dirty |= DirtyGeom;
 }
 
 void QQuickPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
@@ -167,114 +165,55 @@ void QQuickPathRenderer::setStrokeStyle(QQuickPathItem::StrokeStyle strokeStyle,
         m_pen.setDashOffset(dashOffset);
     }
     m_pen.setCosmetic(cosmeticStroke);
-    m_needsNewGeom = true;
+    m_dirty |= DirtyGeom;
 }
 
 void QQuickPathRenderer::endSync()
 {
-    if (!m_needsNewGeom && !m_needsNewColor)
+    if (!m_dirty)
         return;
 
-    if (m_fillColor.a == 0) {
-        delete m_rootNode->m_fillNode;
-        m_rootNode->m_fillNode = nullptr;
-    } else if (!m_rootNode->m_fillNode) {
-        m_rootNode->m_fillNode = new QQuickPathRenderNode(m_rootNode->m_item);
-        if (m_rootNode->m_strokeNode)
-            m_rootNode->removeChildNode(m_rootNode->m_strokeNode);
-        m_rootNode->appendChildNode(m_rootNode->m_fillNode);
-        if (m_rootNode->m_strokeNode)
-            m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
-        m_needsNewGeom = true;
+    m_renderDirty |= m_dirty;
+
+    if (m_path.isEmpty()) {
+        m_fillVertices.clear();
+        m_fillIndices.clear();
+        m_strokeVertices.clear();
+        return;
     }
 
-    if (qFuzzyIsNull(m_pen.widthF()) || m_strokeColor.a == 0) {
-        delete m_rootNode->m_strokeNode;
-        m_rootNode->m_strokeNode = nullptr;
-    } else if (!m_rootNode->m_strokeNode) {
-        m_rootNode->m_strokeNode = new QQuickPathRenderNode(m_rootNode->m_item);
-        m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
-        m_needsNewGeom = true;
-    }
-
-    fill();
-    stroke();
+    triangulateFill();
+    triangulateStroke();
 }
 
-void QQuickPathRenderer::fill()
+void QQuickPathRenderer::triangulateFill()
 {
-    if (!m_rootNode->m_fillNode)
-        return;
-
-    QQuickPathRenderNode *n = m_rootNode->m_fillNode;
-    n->markDirty(QSGNode::DirtyGeometry);
-
-    QSGGeometry *g = &n->m_geometry;
-    if (m_path.isEmpty()) {
-        g->allocate(0, 0);
-        return;
-    }
-
-    if (m_needsNewColor && !m_needsNewGeom) {
-        ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(g->vertexData());
-        for (int i = 0; i < g->vertexCount(); ++i)
-            vdst[i].set(vdst[i].x, vdst[i].y, m_fillColor);
-        return;
-    }
-
     const QVectorPath &vp = qtVectorPathForPath(m_path);
-    QVarLengthArray<QSGGeometry::ColoredPoint2D> vertices;
-    QVarLengthArray<quint16> indices;
 
     QTriangleSet ts = qTriangulate(vp, QTransform::fromScale(SCALE, SCALE));
     const int vertexCount = ts.vertices.count() / 2; // just a qreal vector with x,y hence the / 2
-    vertices.resize(vertexCount);
-    ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(vertices.data());
+    m_fillVertices.resize(vertexCount);
+    ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(m_fillVertices.data());
     const qreal *vsrc = ts.vertices.constData();
     for (int i = 0; i < vertexCount; ++i)
         vdst[i].set(vsrc[i * 2] / SCALE, vsrc[i * 2 + 1] / SCALE, m_fillColor);
 
-    indices.resize(ts.indices.size());
-    quint16 *idst = indices.data();
+    m_fillIndices.resize(ts.indices.size());
+    quint16 *idst = m_fillIndices.data();
     if (ts.indices.type() == QVertexIndexVector::UnsignedShort) {
-        memcpy(idst, ts.indices.data(), indices.count() * sizeof(quint16));
+        memcpy(idst, ts.indices.data(), m_fillIndices.count() * sizeof(quint16));
     } else {
         const quint32 *isrc = (const quint32 *) ts.indices.data();
-        for (int i = 0; i < indices.count(); ++i)
+        for (int i = 0; i < m_fillIndices.count(); ++i)
             idst[i] = isrc[i];
     }
-
-    g->allocate(vertexCount, indices.count());
-    g->setDrawingMode(QSGGeometry::DrawTriangles);
-    memcpy(g->vertexData(), vertices.constData(), g->vertexCount() * g->sizeOfVertex());
-    memcpy(g->indexData(), indices.constData(), g->indexCount() * g->sizeOfIndex());
 }
 
-void QQuickPathRenderer::stroke()
+void QQuickPathRenderer::triangulateStroke()
 {
-    if (!m_rootNode->m_strokeNode)
-        return;
-
-    QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
-    n->markDirty(QSGNode::DirtyGeometry);
-
-    QSGGeometry *g = &n->m_geometry;
-    if (m_path.isEmpty()) {
-        g->allocate(0, 0);
-        return;
-    }
-
-    if (m_needsNewColor && !m_needsNewGeom) {
-        ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(g->vertexData());
-        for (int i = 0; i < g->vertexCount(); ++i)
-            vdst[i].set(vdst[i].x, vdst[i].y, m_strokeColor);
-        return;
-    }
-
     const QVectorPath &vp = qtVectorPathForPath(m_path);
-    QVarLengthArray<QSGGeometry::ColoredPoint2D> vertices;
 
-    const QRectF clip(0, 0, m_rootNode->m_item->width(), m_rootNode->m_item->height());
+    const QRectF clip(0, 0, m_item->width(), m_item->height());
     const qreal inverseScale = 1.0 / SCALE;
     m_stroker.setInvScale(inverseScale);
     if (m_pen.style() == Qt::SolidLine) {
@@ -286,21 +225,104 @@ void QQuickPathRenderer::stroke()
                                m_dashStroker.elementTypes(), 0);
         m_stroker.process(dashStroke, m_pen, clip, 0);
     }
+
     if (!m_stroker.vertexCount()) {
-        g->allocate(0, 0);
+        m_strokeVertices.clear();
         return;
     }
 
     const int vertexCount = m_stroker.vertexCount() / 2; // just a float vector with x,y hence the / 2
-    vertices.resize(vertexCount);
-    ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(vertices.data());
+    m_strokeVertices.resize(vertexCount);
+    ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(m_strokeVertices.data());
     const float *vsrc = m_stroker.vertices();
     for (int i = 0; i < vertexCount; ++i)
         vdst[i].set(vsrc[i * 2], vsrc[i * 2 + 1], m_strokeColor);
+}
 
-    g->allocate(vertexCount, 0);
+void QQuickPathRenderer::updatePathRenderNode()
+{
+    if (!m_renderDirty || !m_rootNode)
+        return;
+
+    if (m_fillColor.a == 0) {
+        delete m_rootNode->m_fillNode;
+        m_rootNode->m_fillNode = nullptr;
+    } else if (!m_rootNode->m_fillNode) {
+        m_rootNode->m_fillNode = new QQuickPathRenderNode(m_item->window());
+        if (m_rootNode->m_strokeNode)
+            m_rootNode->removeChildNode(m_rootNode->m_strokeNode);
+        m_rootNode->appendChildNode(m_rootNode->m_fillNode);
+        if (m_rootNode->m_strokeNode)
+            m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
+        m_renderDirty |= DirtyGeom;
+    }
+
+    if (qFuzzyIsNull(m_pen.widthF()) || m_strokeColor.a == 0) {
+        delete m_rootNode->m_strokeNode;
+        m_rootNode->m_strokeNode = nullptr;
+    } else if (!m_rootNode->m_strokeNode) {
+        m_rootNode->m_strokeNode = new QQuickPathRenderNode(m_item->window());
+        m_rootNode->appendChildNode(m_rootNode->m_strokeNode);
+        m_renderDirty |= DirtyGeom;
+    }
+
+    updateFillGeometry();
+    updateStrokeGeometry();
+
+    m_renderDirty = 0;
+}
+
+void QQuickPathRenderer::updateFillGeometry()
+{
+    if (!m_rootNode->m_fillNode)
+        return;
+
+    QQuickPathRenderNode *n = m_rootNode->m_fillNode;
+    n->markDirty(QSGNode::DirtyGeometry);
+
+    QSGGeometry *g = &n->m_geometry;
+    if (m_fillVertices.isEmpty()) {
+        g->allocate(0, 0);
+        return;
+    }
+
+    if ((m_renderDirty & DirtyColor) && !(m_renderDirty & DirtyGeom)) {
+        ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(g->vertexData());
+        for (int i = 0; i < g->vertexCount(); ++i)
+            vdst[i].set(vdst[i].x, vdst[i].y, m_fillColor);
+        return;
+    }
+
+    g->allocate(m_fillVertices.count(), m_fillIndices.count());
+    g->setDrawingMode(QSGGeometry::DrawTriangles);
+    memcpy(g->vertexData(), m_fillVertices.constData(), g->vertexCount() * g->sizeOfVertex());
+    memcpy(g->indexData(), m_fillIndices.constData(), g->indexCount() * g->sizeOfIndex());
+}
+
+void QQuickPathRenderer::updateStrokeGeometry()
+{
+    if (!m_rootNode->m_strokeNode)
+        return;
+
+    QQuickPathRenderNode *n = m_rootNode->m_strokeNode;
+    n->markDirty(QSGNode::DirtyGeometry);
+
+    QSGGeometry *g = &n->m_geometry;
+    if (m_strokeVertices.isEmpty()) {
+        g->allocate(0, 0);
+        return;
+    }
+
+    if ((m_renderDirty & DirtyColor) && !(m_renderDirty & DirtyGeom)) {
+        ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(g->vertexData());
+        for (int i = 0; i < g->vertexCount(); ++i)
+            vdst[i].set(vdst[i].x, vdst[i].y, m_strokeColor);
+        return;
+    }
+
+    g->allocate(m_strokeVertices.count(), 0);
     g->setDrawingMode(QSGGeometry::DrawTriangleStrip);
-    memcpy(g->vertexData(), vertices.constData(), g->vertexCount() * g->sizeOfVertex());
+    memcpy(g->vertexData(), m_strokeVertices.constData(), g->vertexCount() * g->sizeOfVertex());
 }
 
 QT_END_NAMESPACE

@@ -61,7 +61,13 @@ class QQuickPathRootRenderNode;
 class QQuickPathRenderer : public QQuickAbstractPathRenderer
 {
 public:
-    QQuickPathRenderer(QQuickPathRootRenderNode *rn) : m_rootNode(rn) { }
+    QQuickPathRenderer(QQuickItem *item)
+        : m_item(item),
+          m_rootNode(nullptr),
+          m_renderDirty(0)
+          { }
+
+    void setRootNode(QQuickPathRootRenderNode *rn) { m_rootNode = rn; }
 
     void beginSync() override;
     void setPath(const QPainterPath &path) override;
@@ -75,29 +81,43 @@ public:
                         qreal dashOffset, const QVector<qreal> &dashPattern,
                         bool cosmeticStroke) override;
     void endSync() override;
+    void updatePathRenderNode() override;
 
     struct Color4ub { unsigned char r, g, b, a; };
 
 private:
-    void fill();
-    void stroke();
+    void triangulateFill();
+    void triangulateStroke();
+    void updateFillGeometry();
+    void updateStrokeGeometry();
 
+    QQuickItem *m_item;
     QQuickPathRootRenderNode *m_rootNode;
-    QPainterPath m_path;
     QTriangulatingStroker m_stroker;
     QDashedStrokeProcessor m_dashStroker;
+
     RenderFlags m_flags;
     QPen m_pen;
     Color4ub m_fillColor;
     Color4ub m_strokeColor;
-    uint m_needsNewGeom : 1;
-    uint m_needsNewColor : 1;
+    QPainterPath m_path;
+
+    QVector<QSGGeometry::ColoredPoint2D> m_fillVertices;
+    QVector<quint16> m_fillIndices;
+    QVector<QSGGeometry::ColoredPoint2D> m_strokeVertices;
+
+    enum Dirty {
+        DirtyGeom = 0x01,
+        DirtyColor = 0x02
+    };
+    int m_dirty;
+    int m_renderDirty;
 };
 
 class QQuickPathRenderNode : public QSGGeometryNode
 {
 public:
-    QQuickPathRenderNode(QQuickItem *item);
+    QQuickPathRenderNode(QQuickWindow *window);
     ~QQuickPathRenderNode();
 
 private:
@@ -110,11 +130,10 @@ private:
 class QQuickPathRootRenderNode : public QSGNode
 {
 public:
-    QQuickPathRootRenderNode(QQuickItem *item, bool hasFill, bool hasStroke);
+    QQuickPathRootRenderNode(QQuickWindow *window, bool hasFill, bool hasStroke);
     ~QQuickPathRootRenderNode();
 
 private:
-    QQuickItem *m_item;
     QQuickPathRenderNode *m_fillNode;
     QQuickPathRenderNode *m_strokeNode;
 

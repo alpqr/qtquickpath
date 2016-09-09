@@ -69,43 +69,61 @@ void QQuickPathItemPrivate::handlePathCommandChange()
 {
     Q_Q(QQuickPathItem);
     dirty |= QQuickPathItemPrivate::DirtyPath;
-    q->update();
+    q->updatePath();
 }
 
-QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
+// renderer lives on the gui thread and all its functions except
+// updatePathRenderNode() are invoked on the gui thread.
+void QQuickPathItemPrivate::createRenderer()
 {
-    if (!node) {
-        QSGRendererInterface *ri = item->window()->rendererInterface();
-        if (!ri)
-            return nullptr;
-        const bool hasFill = fillColor != Qt::transparent;
-        const bool hasStroke = !qFuzzyIsNull(strokeWidth) && strokeColor != Qt::transparent;
-        switch (ri->graphicsApi()) {
+    Q_Q(QQuickPathItem);
+    QSGRendererInterface *ri = q->window()->rendererInterface();
+    if (!ri)
+        return;
+
+    switch (ri->graphicsApi()) {
 #ifndef QT_NO_OPENGL
-            case QSGRendererInterface::OpenGL:
-//                if (QNvprRenderNode::isSupported()) {
-//                    node = new QNvprRenderNode(item);
-//                    renderer = new QNvprPathRenderer(static_cast<QNvprRenderNode *>(node));
-//                } else {
-                    node = new QQuickPathRootRenderNode(item, hasFill, hasStroke);
-                    renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
-//                }
-                break;
+    case QSGRendererInterface::OpenGL:
+        renderer = new QQuickPathRenderer(q);
+        break;
 #endif
+    default:
+        qWarning("No path backend for this graphics API yet");
+        break;
+    }
+}
 
-            case QSGRendererInterface::Direct3D12:
-                node = new QQuickPathRootRenderNode(item, hasFill, hasStroke);
-                renderer = new QQuickPathRenderer(static_cast<QQuickPathRootRenderNode *>(node));
-                break;
+// the node lives on the render thread
+QSGNode *QQuickPathItemPrivate::createRenderNode()
+{
+    Q_Q(QQuickPathItem);
+    QSGNode *node = nullptr;
+    if (!q->window())
+        return node;
+    QSGRendererInterface *ri = q->window()->rendererInterface();
+    if (!ri)
+        return node;
 
-            case QSGRendererInterface::Software:
-            default:
-                qWarning("No path backend for this graphics API yet");
-                break;
-        }
-        dirty |= 0xFFFF;
+    const bool hasFill = fillColor != Qt::transparent;
+    const bool hasStroke = !qFuzzyIsNull(strokeWidth) && strokeColor != Qt::transparent;
+
+    switch (ri->graphicsApi()) {
+#ifndef QT_NO_OPENGL
+    case QSGRendererInterface::OpenGL:
+        node = new QQuickPathRootRenderNode(q->window(), hasFill, hasStroke);
+        static_cast<QQuickPathRenderer *>(renderer)->setRootNode(static_cast<QQuickPathRootRenderNode *>(node));
+        break;
+#endif
+    default:
+        qWarning("No path backend for this graphics API yet");
+        break;
     }
 
+    return node;
+}
+
+void QQuickPathItemPrivate::sync()
+{
     renderer->beginSync();
 
     if (dirty & QQuickPathItemPrivate::DirtyPath) {
@@ -132,14 +150,43 @@ QSGNode *QQuickPathItemPrivate::updatePaintNode(QQuickItem *item, QSGNode *node)
 
     renderer->endSync();
     dirty = 0;
+}
 
-    return node;
+void QQuickPathItem::updatePolish()
+{
+    Q_D(QQuickPathItem);
+
+    if (!d->dirty)
+        return;
+
+    if (!d->renderer)
+        d->createRenderer();
+
+    d->sync();
+
+    update();
 }
 
 QSGNode *QQuickPathItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
 {
+    // on the render thread, with the gui thread blocked. we can now
+    // safely access gui thread data.
+
     Q_D(QQuickPathItem);
-    return d->updatePaintNode(this, node);
+    if (!node) {
+        node = d->createRenderNode();
+        d->dirty |= 0xFFFF;
+    }
+
+    if (d->renderer)
+        d->renderer->updatePathRenderNode();
+
+    return node;
+}
+
+void QQuickPathItem::updatePath()
+{
+    polish();
 }
 
 void QQuickPathItem::clear()
@@ -263,7 +310,7 @@ void QQuickPathItem::setFillRule(FillRule fillRule)
         d->path.setFillRule(Qt::FillRule(fillRule));
         d->dirty |= QQuickPathItemPrivate::DirtyPath;
         emit fillRuleChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -280,7 +327,7 @@ void QQuickPathItem::setFillColor(const QColor &color)
         d->fillColor = color;
         d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
         emit fillColorChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -295,12 +342,12 @@ void QQuickPathItem::setFillGradient(QQuickPathGradient *gradient)
     Q_D(QQuickPathItem);
     if (d->fillGradient != gradient) {
         if (d->fillGradient)
-            disconnect(d->fillGradient, &QQuickPathGradient::updated, this, &QQuickItem::update);
+            disconnect(d->fillGradient, &QQuickPathGradient::updated, this, &QQuickPathItem::updatePath);
         d->fillGradient = gradient;
         if (d->fillGradient)
-            connect(d->fillGradient, &QQuickPathGradient::updated, this, &QQuickItem::update);
+            connect(d->fillGradient, &QQuickPathGradient::updated, this, &QQuickPathItem::updatePath);
         d->dirty |= QQuickPathItemPrivate::DirtyFillColor;
-        update();
+        updatePath();
     }
 }
 
@@ -322,7 +369,7 @@ void QQuickPathItem::setStrokeColor(const QColor &color)
         d->strokeColor = color;
         d->dirty |= QQuickPathItemPrivate::DirtyStrokeColor;
         emit strokeColorChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -339,7 +386,7 @@ void QQuickPathItem::setStrokeWidth(qreal w)
         d->strokeWidth = w;
         d->dirty |= QQuickPathItemPrivate::DirtyStrokeWidth;
         emit strokeWidthChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -356,7 +403,7 @@ void QQuickPathItem::setJoinStyle(JoinStyle style)
         d->joinStyle = style;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit joinStyleChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -373,7 +420,7 @@ void QQuickPathItem::setMiterLimit(int limit)
         d->miterLimit = limit;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit miterLimitChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -390,7 +437,7 @@ void QQuickPathItem::setCapStyle(CapStyle style)
         d->capStyle = style;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit capStyleChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -407,7 +454,7 @@ void QQuickPathItem::setStrokeStyle(StrokeStyle style)
         d->strokeStyle = style;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit strokeStyleChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -424,7 +471,7 @@ void QQuickPathItem::setDashOffset(qreal offset)
         d->dashOffset = offset;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit dashOffsetChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -441,7 +488,7 @@ void QQuickPathItem::setDashPattern(const QVector<qreal> &array)
         d->dashPattern = array;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit dashPatternChanged();
-        update();
+        updatePath();
     }
 }
 
@@ -458,7 +505,7 @@ void QQuickPathItem::setCosmeticStroke(bool cosmetic)
         d->cosmeticStroke = cosmetic;
         d->dirty |= QQuickPathItemPrivate::DirtyStyle;
         emit cosmeticStrokeChanged();
-        update();
+        updatePath();
     }
 }
 

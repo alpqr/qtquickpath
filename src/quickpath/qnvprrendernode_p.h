@@ -76,6 +76,7 @@ public:
                         qreal dashOffset, const QVector<qreal> &dashPattern,
                         bool cosmeticStroke) override;
     void endSync() override;
+    void updatePathRenderNode() override;
 
 private:
     QNvprRenderNode *m_node;

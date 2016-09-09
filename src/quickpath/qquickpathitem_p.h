@@ -166,8 +166,12 @@ public:
 
     QQmlListProperty<QObject> commands();
 
+public slots:
+    void updatePath();
+
 protected:
     QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *) override;
+    void updatePolish() override;
 
 signals:
     void fillColorChanged();

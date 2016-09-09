@@ -211,6 +211,10 @@ void QNvprPathRenderer::endSync()
 {
 }
 
+void QNvprPathRenderer::updatePathRenderNode()
+{
+}
+
 QT_END_NAMESPACE
 
 #endif // QT_NO_OPENGL
