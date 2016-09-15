@@ -25,3 +25,5 @@ HEADERS += $$PWD/qnvpr.h \
            $$PWD/qquickpathitem_p_p.h \
            $$PWD/qquickpathgradient_p.h \
            $$PWD/qquickpathcommand_p.h
+
+RESOURCES += $$PWD/quickpath.qrc

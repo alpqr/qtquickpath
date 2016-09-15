@@ -57,6 +57,7 @@ class QQuickPathRenderMaterialFactory
 {
 public:
     static QSGMaterial *createVertexColor(QQuickWindow *window);
+    static QSGMaterial *createLinearGradient(QQuickWindow *window);
 };
 
 QT_END_NAMESPACE

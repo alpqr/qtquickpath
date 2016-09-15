@@ -88,8 +88,8 @@ public:
 private:
     void triangulateFill();
     void triangulateStroke();
-    void updateFillGeometry();
-    void updateStrokeGeometry();
+    void updateFillNode();
+    void updateStrokeNode();
 
     QQuickItem *m_item;
     QQuickPathRootRenderNode *m_rootNode;
@@ -123,9 +123,19 @@ public:
     QQuickPathRenderNode(QQuickWindow *window);
     ~QQuickPathRenderNode();
 
+    enum Material {
+        MatSolidColor,
+        MatLinearGradient
+    };
+
+    void activateMaterial(Material m);
+
 private:
     QSGGeometry m_geometry;
-    QScopedPointer<QSGMaterial> m_material;
+    QQuickWindow *m_window;
+    QSGMaterial *m_material;
+    QScopedPointer<QSGMaterial> m_solidColorMaterial;
+    QScopedPointer<QSGMaterial> m_linearGradientMaterial;
 
     friend class QQuickPathRenderer;
 };

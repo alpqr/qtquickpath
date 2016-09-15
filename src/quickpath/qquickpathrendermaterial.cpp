@@ -50,9 +50,89 @@ QSGMaterial *QQuickPathRenderMaterialFactory::createVertexColor(QQuickWindow *wi
         return new QSGVertexColorMaterial;
 #endif
 
-    if (api == QSGRendererInterface::Direct3D12) {
-        // ###
+    qWarning("Unsupported api %d", api);
+    return nullptr;
+}
+
+class QQuickPathRenderLinearGradientShader : public QSGMaterialShader
+{
+public:
+    QQuickPathRenderLinearGradientShader();
+
+    void initialize() override;
+    void updateState(const RenderState &state, QSGMaterial *newEffect, QSGMaterial *oldEffect) override;
+    char const *const *attributeNames() const override;
+
+    static QSGMaterialType type;
+
+private:
+    int m_opacityLoc;
+    int m_matrixLoc;
+};
+
+QSGMaterialType QQuickPathRenderLinearGradientShader::type;
+
+QQuickPathRenderLinearGradientShader::QQuickPathRenderLinearGradientShader()
+{
+#ifndef QT_NO_OPENGL
+    setShaderSourceFile(QOpenGLShader::Vertex,
+                        QStringLiteral(":/qt-project.org/scenegraph/path/shaders/lineargradient.vert"));
+    setShaderSourceFile(QOpenGLShader::Fragment,
+                        QStringLiteral(":/qt-project.org/scenegraph/path/shaders/lineargradient.frag"));
+#endif
+}
+
+void QQuickPathRenderLinearGradientShader::initialize()
+{
+#ifndef QT_NO_OPENGL
+    m_opacityLoc = program()->uniformLocation("opacity");
+    m_matrixLoc = program()->uniformLocation("matrix");
+#endif
+}
+
+void QQuickPathRenderLinearGradientShader::updateState(const RenderState &state, QSGMaterial *, QSGMaterial *)
+{
+#ifndef QT_NO_OPENGL
+    if (state.isOpacityDirty())
+        program()->setUniformValue(m_opacityLoc, state.opacity());
+    if (state.isMatrixDirty())
+        program()->setUniformValue(m_matrixLoc, state.combinedMatrix());
+#endif
+}
+
+char const *const *QQuickPathRenderLinearGradientShader::attributeNames() const
+{
+    static const char *const attr[] = { "vertexCoord", "vertexColor", nullptr };
+    return attr;
+}
+
+class QQuickPathRenderLinearGradientMaterial : public QSGMaterial
+{
+public:
+    QQuickPathRenderLinearGradientMaterial() {
+        setFlag(Blending);
     }
+    QSGMaterialType *type() const override {
+        return &QQuickPathRenderLinearGradientShader::type;
+    }
+    int compare(const QSGMaterial *other) const override {
+        // ###
+        return 0;
+    }
+    QSGMaterialShader *createShader() const override {
+        return new QQuickPathRenderLinearGradientShader;
+    }
+};
+
+QSGMaterial *QQuickPathRenderMaterialFactory::createLinearGradient(QQuickWindow *window)
+{
+    QSGRendererInterface *rif = window->rendererInterface();
+    QSGRendererInterface::GraphicsApi api = rif->graphicsApi();
+
+#ifndef QT_NO_OPENGL
+    if (api == QSGRendererInterface::OpenGL)
+        return new QQuickPathRenderLinearGradientMaterial;
+#endif
 
     qWarning("Unsupported api %d", api);
     return nullptr;

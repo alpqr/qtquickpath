@@ -93,18 +93,40 @@ QQuickPathRootRenderNode::~QQuickPathRootRenderNode()
 }
 
 QQuickPathRenderNode::QQuickPathRenderNode(QQuickWindow *window)
-    : m_geometry(QSGGeometry::defaultAttributes_ColoredPoint2D(), 0, 0)
+    : m_geometry(QSGGeometry::defaultAttributes_ColoredPoint2D(), 0, 0),
+      m_window(window),
+      m_material(nullptr)
 {
     setGeometry(&m_geometry);
-
-    // Use vertexcolor material. Items with different colors remain batchable
-    // this way, at the expense of having to provide per-vertex color values.
-    m_material.reset(QQuickPathRenderMaterialFactory::createVertexColor(window));
-    setMaterial(m_material.data());
+    activateMaterial(MatSolidColor);
 }
 
 QQuickPathRenderNode::~QQuickPathRenderNode()
 {
+}
+
+void QQuickPathRenderNode::activateMaterial(Material m)
+{
+    switch (m) {
+    case MatSolidColor:
+        // Use vertexcolor material. Items with different colors remain batchable
+        // this way, at the expense of having to provide per-vertex color values.
+        if (!m_solidColorMaterial)
+            m_solidColorMaterial.reset(QQuickPathRenderMaterialFactory::createVertexColor(m_window));
+        m_material = m_solidColorMaterial.data();
+        break;
+    case MatLinearGradient:
+        if (!m_linearGradientMaterial)
+            m_linearGradientMaterial.reset(QQuickPathRenderMaterialFactory::createLinearGradient(m_window));
+        m_material = m_linearGradientMaterial.data();
+        break;
+    default:
+        qWarning("Unknown material %d", m);
+        return;
+    }
+
+    if (material() != m_material)
+        setMaterial(m_material);
 }
 
 void QQuickPathRenderer::beginSync()
@@ -269,13 +291,13 @@ void QQuickPathRenderer::updatePathRenderNode()
         m_renderDirty |= DirtyGeom;
     }
 
-    updateFillGeometry();
-    updateStrokeGeometry();
+    updateFillNode();
+    updateStrokeNode();
 
     m_renderDirty = 0;
 }
 
-void QQuickPathRenderer::updateFillGeometry()
+void QQuickPathRenderer::updateFillNode()
 {
     if (!m_rootNode->m_fillNode)
         return;
@@ -289,11 +311,21 @@ void QQuickPathRenderer::updateFillGeometry()
         return;
     }
 
-    if ((m_renderDirty & DirtyColor) && !(m_renderDirty & DirtyGeom)) {
-        ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(g->vertexData());
-        for (int i = 0; i < g->vertexCount(); ++i)
-            vdst[i].set(vdst[i].x, vdst[i].y, m_fillColor);
-        return;
+    const bool onlyColorDirty = (m_renderDirty & DirtyColor) && !(m_renderDirty & DirtyGeom);
+    if (!m_fillGradientActive) {
+        n->activateMaterial(QQuickPathRenderNode::MatSolidColor);
+        if (onlyColorDirty) {
+            ColoredVertex *vdst = reinterpret_cast<ColoredVertex *>(g->vertexData());
+            for (int i = 0; i < g->vertexCount(); ++i)
+                vdst[i].set(vdst[i].x, vdst[i].y, m_fillColor);
+            return;
+        }
+    } else {
+        n->activateMaterial(QQuickPathRenderNode::MatLinearGradient);
+        if (m_renderDirty & DirtyColor)
+            n->markDirty(QSGNode::DirtyMaterial);
+        if (onlyColorDirty)
+            return;
     }
 
     g->allocate(m_fillVertices.count(), m_fillIndices.count());
@@ -302,7 +334,7 @@ void QQuickPathRenderer::updateFillGeometry()
     memcpy(g->indexData(), m_fillIndices.constData(), g->indexCount() * g->sizeOfIndex());
 }
 
-void QQuickPathRenderer::updateStrokeGeometry()
+void QQuickPathRenderer::updateStrokeNode()
 {
     if (!m_rootNode->m_strokeNode)
         return;

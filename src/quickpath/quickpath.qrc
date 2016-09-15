@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/qt-project.org/scenegraph/path">
+        <file>shaders/lineargradient.vert</file>
+        <file>shaders/lineargradient.frag</file>
+    </qresource>
+</RCC>
