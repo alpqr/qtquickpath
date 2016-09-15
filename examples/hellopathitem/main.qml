@@ -271,6 +271,22 @@ Item {
             onTriggered: ellipse.strokeWidth = (ellipse.strokeWidth > 0 ? 0 : 5)
         }
 
+        PathItem {
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.topMargin: 100
+            width: 100
+            height: 100
+            strokeColor: "yellow"
+            fillGradient: PathGradient {
+                PathGradientStop { position: 0; color: "steelblue" }
+                PathGradientStop { position: 1; color: "black" }
+            }
+            LineTo { x: 0; y: 80 }
+            LineTo { x: 80; y: 80 }
+            ClosePath { }
+        }
+
         MouseArea {
             anchors.fill: parent
             onClicked: { background.visible = !background.visible;

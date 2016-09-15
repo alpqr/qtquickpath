@@ -96,4 +96,17 @@ QQmlListProperty<QObject> QQuickPathGradient::stops()
     return QQmlListProperty<QObject>(this, nullptr, &QQuickPathGradient::appendStop, nullptr, nullptr, nullptr);
 }
 
+QGradientStops QQuickPathGradient::sortedGradientStops() const
+{
+    QGradientStops result;
+    for (int i = 0; i < m_stops.count(); ++i) {
+        QQuickPathGradientStop *s = static_cast<QQuickPathGradientStop *>(m_stops[i]);
+        int j = 0;
+        while (j < result.count() && result[j].first < s->position())
+            ++j;
+        result.insert(j, QGradientStop(s->position(), s->color()));
+    }
+    return result;
+}
+
 QT_END_NAMESPACE

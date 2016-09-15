@@ -112,6 +112,9 @@ private:
     };
     int m_dirty;
     int m_renderDirty;
+
+    bool m_fillGradientActive;
+    QGradientStops m_fillGradientStops;
 };
 
 class QQuickPathRenderNode : public QSGGeometryNode

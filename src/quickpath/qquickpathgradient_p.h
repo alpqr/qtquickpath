@@ -50,6 +50,7 @@
 
 #include <QtQuickPath/qtquickpathglobal.h>
 #include <QQuickItem>
+#include <QBrush>
 
 QT_BEGIN_NAMESPACE
 
@@ -83,6 +84,8 @@ public:
     QQuickPathGradient(QObject *parent = nullptr);
 
     QQmlListProperty<QObject> stops();
+
+    QGradientStops sortedGradientStops() const;
 
 signals:
     void updated();

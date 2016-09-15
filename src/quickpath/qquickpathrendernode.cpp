@@ -121,6 +121,9 @@ void QQuickPathRenderer::setPath(const QPainterPath &path)
 void QQuickPathRenderer::setFillColor(const QColor &color, QQuickPathGradient *gradient)
 {
     m_fillColor = colorToColor4ub(color);
+    m_fillGradientActive = gradient != nullptr;
+    if (gradient)
+        m_fillGradientStops = gradient->sortedGradientStops();
     m_dirty |= DirtyColor;
 }
 
