@@ -61,7 +61,7 @@ class QQuickPathItemPrivate : public QQuickItemPrivate
 public:
     QQuickPathItemPrivate()
         : renderer(nullptr),
-          dirty(0),
+          dirty(DirtyAll),
           strokeWidth(1),
           strokeColor(Qt::white),
           fillColor(Qt::white),
@@ -91,7 +91,9 @@ public:
         DirtyStrokeColor = 0x04,
         DirtyStrokeWidth = 0x08,
         DirtyFlags = 0x10,
-        DirtyStyle = 0x20
+        DirtyStyle = 0x20,
+
+        DirtyAll = 0xFF
     };
 
     QPainterPath path;
