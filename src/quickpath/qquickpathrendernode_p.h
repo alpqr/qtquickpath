@@ -61,13 +61,18 @@ class QQuickPathRootRenderNode;
 class QQuickPathRenderer : public QQuickAbstractPathRenderer
 {
 public:
+    enum Dirty {
+        DirtyGeom = 0x01,
+        DirtyColor = 0x02
+    };
+
     QQuickPathRenderer(QQuickItem *item)
         : m_item(item),
           m_rootNode(nullptr),
           m_renderDirty(0)
           { }
 
-    void setRootNode(QQuickPathRootRenderNode *rn) { m_rootNode = rn; }
+    void setRootNode(QQuickPathRootRenderNode *rn);
 
     void beginSync() override;
     void setPath(const QPainterPath &path) override;
@@ -106,21 +111,21 @@ private:
     QVector<quint16> m_fillIndices;
     QVector<QSGGeometry::ColoredPoint2D> m_strokeVertices;
 
-    enum Dirty {
-        DirtyGeom = 0x01,
-        DirtyColor = 0x02
-    };
-    int m_dirty;
+    int m_guiDirty;
     int m_renderDirty;
 
     bool m_fillGradientActive;
     QGradientStops m_fillGradientStops;
+    QPointF m_fillGradientStart;
+    QPointF m_fillGradientEnd;
+
+    friend class QQuickPathRenderLinearGradientShader;
 };
 
 class QQuickPathRenderNode : public QSGGeometryNode
 {
 public:
-    QQuickPathRenderNode(QQuickWindow *window);
+    QQuickPathRenderNode(QQuickWindow *window, QQuickPathRootRenderNode *rootNode);
     ~QQuickPathRenderNode();
 
     enum Material {
@@ -130,9 +135,16 @@ public:
 
     void activateMaterial(Material m);
 
+    QQuickWindow *window() const { return m_window; }
+    QQuickPathRootRenderNode *rootNode() const { return m_rootNode; }
+    int dirty() const { return m_dirty; }
+    void resetDirty() { m_dirty = 0; }
+
 private:
     QSGGeometry m_geometry;
     QQuickWindow *m_window;
+    QQuickPathRootRenderNode *m_rootNode;
+    int m_dirty;
     QSGMaterial *m_material;
     QScopedPointer<QSGMaterial> m_solidColorMaterial;
     QScopedPointer<QSGMaterial> m_linearGradientMaterial;
@@ -146,9 +158,12 @@ public:
     QQuickPathRootRenderNode(QQuickWindow *window, bool hasFill, bool hasStroke);
     ~QQuickPathRootRenderNode();
 
+    QQuickPathRenderer *renderer() const { return m_renderer; }
+
 private:
     QQuickPathRenderNode *m_fillNode;
     QQuickPathRenderNode *m_strokeNode;
+    QQuickPathRenderer *m_renderer;
 
     friend class QQuickPathRenderer;
 };

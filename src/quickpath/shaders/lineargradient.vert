@@ -1,15 +1,15 @@
-attribute highp vec4 vertexCoord;
-attribute highp vec4 vertexColor;
+attribute vec4 vertexCoord;
+attribute vec4 vertexColor;
 
-uniform highp mat4 matrix;
-uniform mediump vec2 halfViewportSize;
-uniform highp vec3 linearData;
+uniform mat4 matrix;
+uniform vec2 viewportSize;
+uniform vec2 gradVec;
 
-varying mediump float gradTabIndex;
+varying float gradTabIndex;
 
 void main()
 {
     gl_Position = matrix * vertexCoord;
-    mediump vec2 viewportCoords = (gl_Position.xy + 1.0) * halfViewportSize;
-    gradTabIndex = dot(linearData.xy, viewportCoords) * linearData.z;
+    vec2 viewportCoords = (gl_Position.xy + 1.0) * viewportSize * vec2(0.5);
+    gradTabIndex = dot(gradVec.xy, viewportCoords) / (gradVec.x * gradVec.x + gradVec.y * gradVec.y);
 }

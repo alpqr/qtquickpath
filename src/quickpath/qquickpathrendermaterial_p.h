@@ -53,11 +53,13 @@
 
 QT_BEGIN_NAMESPACE
 
+class QQuickPathRenderNode;
+
 class QQuickPathRenderMaterialFactory
 {
 public:
     static QSGMaterial *createVertexColor(QQuickWindow *window);
-    static QSGMaterial *createLinearGradient(QQuickWindow *window);
+    static QSGMaterial *createLinearGradient(QQuickWindow *window, QQuickPathRenderNode *node);
 };
 
 QT_END_NAMESPACE

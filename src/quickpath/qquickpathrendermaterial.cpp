@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include "qquickpathrendermaterial_p.h"
+#include "qquickpathrendernode_p.h"
 #include <QQuickWindow>
 #include <QSGVertexColorMaterial>
 
@@ -68,9 +69,36 @@ public:
 private:
     int m_opacityLoc;
     int m_matrixLoc;
+    int m_viewportSizeLoc;
+    int m_gradVecLoc;
 };
 
 QSGMaterialType QQuickPathRenderLinearGradientShader::type;
+
+class QQuickPathRenderLinearGradientMaterial : public QSGMaterial
+{
+public:
+    QQuickPathRenderLinearGradientMaterial(QQuickPathRenderNode *node)
+        : m_node(node)
+    {
+        setFlag(Blending);
+    }
+    QSGMaterialType *type() const override {
+        return &QQuickPathRenderLinearGradientShader::type;
+    }
+    int compare(const QSGMaterial *other) const override {
+        // ###
+        return 0;
+    }
+    QSGMaterialShader *createShader() const override {
+        return new QQuickPathRenderLinearGradientShader;
+    }
+
+    QQuickPathRenderNode *node() const { return m_node; }
+
+private:
+    QQuickPathRenderNode *m_node;
+};
 
 QQuickPathRenderLinearGradientShader::QQuickPathRenderLinearGradientShader()
 {
@@ -87,16 +115,32 @@ void QQuickPathRenderLinearGradientShader::initialize()
 #ifndef QT_NO_OPENGL
     m_opacityLoc = program()->uniformLocation("opacity");
     m_matrixLoc = program()->uniformLocation("matrix");
+    m_viewportSizeLoc = program()->uniformLocation("viewportSize");
+    m_gradVecLoc = program()->uniformLocation("gradVec");
 #endif
 }
 
-void QQuickPathRenderLinearGradientShader::updateState(const RenderState &state, QSGMaterial *, QSGMaterial *)
+void QQuickPathRenderLinearGradientShader::updateState(const RenderState &state, QSGMaterial *mat, QSGMaterial *)
 {
 #ifndef QT_NO_OPENGL
+    QQuickPathRenderLinearGradientMaterial *m = static_cast<QQuickPathRenderLinearGradientMaterial *>(mat);
     if (state.isOpacityDirty())
         program()->setUniformValue(m_opacityLoc, state.opacity());
     if (state.isMatrixDirty())
         program()->setUniformValue(m_matrixLoc, state.combinedMatrix());
+    if (m->node()->dirty() & QQuickPathRenderer::DirtyColor) {
+        QQuickPathRenderer *r = m->node()->rootNode()->renderer();
+        if (r) {
+            QPointF vec = r->m_fillGradientEnd - r->m_fillGradientStart;
+            const QVector2D gradVec(vec.x(), vec.y());
+            program()->setUniformValue(m_gradVecLoc, gradVec);
+            QQuickWindow *w = m->node()->window();
+            const QSize sz = w->size() * w->effectiveDevicePixelRatio();
+            const QVector2D viewportSize(sz.width(), sz.height());
+            program()->setUniformValue(m_viewportSizeLoc, viewportSize);
+        }
+    }
+    m->node()->resetDirty();
 #endif
 }
 
@@ -106,32 +150,14 @@ char const *const *QQuickPathRenderLinearGradientShader::attributeNames() const
     return attr;
 }
 
-class QQuickPathRenderLinearGradientMaterial : public QSGMaterial
-{
-public:
-    QQuickPathRenderLinearGradientMaterial() {
-        setFlag(Blending);
-    }
-    QSGMaterialType *type() const override {
-        return &QQuickPathRenderLinearGradientShader::type;
-    }
-    int compare(const QSGMaterial *other) const override {
-        // ###
-        return 0;
-    }
-    QSGMaterialShader *createShader() const override {
-        return new QQuickPathRenderLinearGradientShader;
-    }
-};
-
-QSGMaterial *QQuickPathRenderMaterialFactory::createLinearGradient(QQuickWindow *window)
+QSGMaterial *QQuickPathRenderMaterialFactory::createLinearGradient(QQuickWindow *window, QQuickPathRenderNode *node)
 {
     QSGRendererInterface *rif = window->rendererInterface();
     QSGRendererInterface::GraphicsApi api = rif->graphicsApi();
 
 #ifndef QT_NO_OPENGL
     if (api == QSGRendererInterface::OpenGL)
-        return new QQuickPathRenderLinearGradientMaterial;
+        return new QQuickPathRenderLinearGradientMaterial(node);
 #endif
 
     qWarning("Unsupported api %d", api);

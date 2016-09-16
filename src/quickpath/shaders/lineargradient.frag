@@ -1,7 +1,7 @@
 uniform sampler2D gradTabTexture;
 uniform highp float opacity;
 
-varying mediump float gradTabIndex;
+varying highp float gradTabIndex;
 
 void main()
 {

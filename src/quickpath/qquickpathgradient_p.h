@@ -78,6 +78,10 @@ class QQUICKPATH_EXPORT QQuickPathGradient : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> stops READ stops)
+    Q_PROPERTY(qreal x1 READ x1 WRITE setX1 NOTIFY x1Changed)
+    Q_PROPERTY(qreal y1 READ y1 WRITE setY1 NOTIFY y1Changed)
+    Q_PROPERTY(qreal x2 READ x2 WRITE setX2 NOTIFY x2Changed)
+    Q_PROPERTY(qreal y2 READ y2 WRITE setY2 NOTIFY y2Changed)
     Q_CLASSINFO("DefaultProperty", "stops")
 
 public:
@@ -87,13 +91,28 @@ public:
 
     QGradientStops sortedGradientStops() const;
 
+    qreal x1() const;
+    void setX1(qreal v);
+    qreal y1() const;
+    void setY1(qreal v);
+    qreal x2() const;
+    void setX2(qreal v);
+    qreal y2() const;
+    void setY2(qreal v);
+
 signals:
     void updated();
+    void x1Changed();
+    void y1Changed();
+    void x2Changed();
+    void y2Changed();
 
 private:
     static void appendStop(QQmlListProperty<QObject> *list, QObject *stop);
 
     QVector<QObject *> m_stops;
+    QPointF m_start;
+    QPointF m_end;
 };
 
 QT_END_NAMESPACE

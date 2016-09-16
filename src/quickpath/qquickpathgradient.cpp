@@ -109,4 +109,60 @@ QGradientStops QQuickPathGradient::sortedGradientStops() const
     return result;
 }
 
+qreal QQuickPathGradient::x1() const
+{
+    return m_start.x();
+}
+
+void QQuickPathGradient::setX1(qreal v)
+{
+    if (m_start.x() != v) {
+        m_start.setX(v);
+        emit x1Changed();
+        emit updated();
+    }
+}
+
+qreal QQuickPathGradient::y1() const
+{
+    return m_start.y();
+}
+
+void QQuickPathGradient::setY1(qreal v)
+{
+    if (m_start.y() != v) {
+        m_start.setY(v);
+        emit y1Changed();
+        emit updated();
+    }
+}
+
+qreal QQuickPathGradient::x2() const
+{
+    return m_end.x();
+}
+
+void QQuickPathGradient::setX2(qreal v)
+{
+    if (m_end.x() != v) {
+        m_end.setX(v);
+        emit x2Changed();
+        emit updated();
+    }
+}
+
+qreal QQuickPathGradient::y2() const
+{
+    return m_end.y();
+}
+
+void QQuickPathGradient::setY2(qreal v)
+{
+    if (m_end.y() != v) {
+        m_end.setY(v);
+        emit y2Changed();
+        emit updated();
+    }
+}
+
 QT_END_NAMESPACE
