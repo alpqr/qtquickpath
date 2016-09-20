@@ -119,7 +119,7 @@ private:
     QPointF m_fillGradientStart;
     QPointF m_fillGradientEnd;
 
-    friend class QQuickPathRenderLinearGradientShader;
+    friend class QQuickPathLinearGradientShader;
 };
 
 class QQuickPathRenderNode : public QSGGeometryNode

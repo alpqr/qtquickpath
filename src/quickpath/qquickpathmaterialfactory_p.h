@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QQUICKPATHRENDERMATERIAL_P_H
-#define QQUICKPATHRENDERMATERIAL_P_H
+#ifndef QQUICKPATHMATERIALFACTORY_P_H
+#define QQUICKPATHMATERIALFACTORY_P_H
 
 //
 //  W A R N I N G
@@ -55,7 +55,7 @@ QT_BEGIN_NAMESPACE
 
 class QQuickPathRenderNode;
 
-class QQuickPathRenderMaterialFactory
+class QQuickPathMaterialFactory
 {
 public:
     static QSGMaterial *createVertexColor(QQuickWindow *window);

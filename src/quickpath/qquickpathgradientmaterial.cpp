@@ -34,73 +34,15 @@
 **
 ****************************************************************************/
 
-#include "qquickpathrendermaterial_p.h"
+#include "qquickpathgradientmaterial_p.h"
 #include "qquickpathrendernode_p.h"
 #include <QQuickWindow>
-#include <QSGVertexColorMaterial>
 
 QT_BEGIN_NAMESPACE
 
-QSGMaterial *QQuickPathRenderMaterialFactory::createVertexColor(QQuickWindow *window)
-{
-    QSGRendererInterface *rif = window->rendererInterface();
-    QSGRendererInterface::GraphicsApi api = rif->graphicsApi();
+QSGMaterialType QQuickPathLinearGradientShader::type;
 
-#ifndef QT_NO_OPENGL
-    if (api == QSGRendererInterface::OpenGL)
-        return new QSGVertexColorMaterial;
-#endif
-
-    qWarning("Unsupported api %d", api);
-    return nullptr;
-}
-
-class QQuickPathRenderLinearGradientShader : public QSGMaterialShader
-{
-public:
-    QQuickPathRenderLinearGradientShader();
-
-    void initialize() override;
-    void updateState(const RenderState &state, QSGMaterial *newEffect, QSGMaterial *oldEffect) override;
-    char const *const *attributeNames() const override;
-
-    static QSGMaterialType type;
-
-private:
-    int m_opacityLoc;
-    int m_matrixLoc;
-    int m_viewportSizeLoc;
-    int m_gradVecLoc;
-};
-
-QSGMaterialType QQuickPathRenderLinearGradientShader::type;
-
-class QQuickPathRenderLinearGradientMaterial : public QSGMaterial
-{
-public:
-    QQuickPathRenderLinearGradientMaterial(QQuickPathRenderNode *node)
-        : m_node(node)
-    {
-        setFlag(Blending);
-    }
-    QSGMaterialType *type() const override {
-        return &QQuickPathRenderLinearGradientShader::type;
-    }
-    int compare(const QSGMaterial *other) const override {
-        // ###
-        return 0;
-    }
-    QSGMaterialShader *createShader() const override {
-        return new QQuickPathRenderLinearGradientShader;
-    }
-
-    QQuickPathRenderNode *node() const { return m_node; }
-
-private:
-    QQuickPathRenderNode *m_node;
-};
-
-QQuickPathRenderLinearGradientShader::QQuickPathRenderLinearGradientShader()
+QQuickPathLinearGradientShader::QQuickPathLinearGradientShader()
 {
 #ifndef QT_NO_OPENGL
     setShaderSourceFile(QOpenGLShader::Vertex,
@@ -110,7 +52,7 @@ QQuickPathRenderLinearGradientShader::QQuickPathRenderLinearGradientShader()
 #endif
 }
 
-void QQuickPathRenderLinearGradientShader::initialize()
+void QQuickPathLinearGradientShader::initialize()
 {
 #ifndef QT_NO_OPENGL
     m_opacityLoc = program()->uniformLocation("opacity");
@@ -120,10 +62,10 @@ void QQuickPathRenderLinearGradientShader::initialize()
 #endif
 }
 
-void QQuickPathRenderLinearGradientShader::updateState(const RenderState &state, QSGMaterial *mat, QSGMaterial *)
+void QQuickPathLinearGradientShader::updateState(const RenderState &state, QSGMaterial *mat, QSGMaterial *)
 {
 #ifndef QT_NO_OPENGL
-    QQuickPathRenderLinearGradientMaterial *m = static_cast<QQuickPathRenderLinearGradientMaterial *>(mat);
+    QQuickPathLinearGradientMaterial *m = static_cast<QQuickPathLinearGradientMaterial *>(mat);
     if (state.isOpacityDirty())
         program()->setUniformValue(m_opacityLoc, state.opacity());
     if (state.isMatrixDirty())
@@ -144,24 +86,16 @@ void QQuickPathRenderLinearGradientShader::updateState(const RenderState &state,
 #endif
 }
 
-char const *const *QQuickPathRenderLinearGradientShader::attributeNames() const
+char const *const *QQuickPathLinearGradientShader::attributeNames() const
 {
     static const char *const attr[] = { "vertexCoord", "vertexColor", nullptr };
     return attr;
 }
 
-QSGMaterial *QQuickPathRenderMaterialFactory::createLinearGradient(QQuickWindow *window, QQuickPathRenderNode *node)
+int QQuickPathLinearGradientMaterial::compare(const QSGMaterial *other) const
 {
-    QSGRendererInterface *rif = window->rendererInterface();
-    QSGRendererInterface::GraphicsApi api = rif->graphicsApi();
-
-#ifndef QT_NO_OPENGL
-    if (api == QSGRendererInterface::OpenGL)
-        return new QQuickPathRenderLinearGradientMaterial(node);
-#endif
-
-    qWarning("Unsupported api %d", api);
-    return nullptr;
+    // ###
+    return 0;
 }
 
 QT_END_NAMESPACE

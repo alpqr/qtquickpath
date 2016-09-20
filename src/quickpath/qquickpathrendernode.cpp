@@ -35,7 +35,7 @@
 ****************************************************************************/
 
 #include "qquickpathrendernode_p.h"
-#include "qquickpathrendermaterial_p.h"
+#include "qquickpathmaterialfactory_p.h"
 #include "qquickpathitem_p.h"
 #include <QtGui/private/qtriangulator_p.h>
 
@@ -115,12 +115,12 @@ void QQuickPathRenderNode::activateMaterial(Material m)
         // Use vertexcolor material. Items with different colors remain batchable
         // this way, at the expense of having to provide per-vertex color values.
         if (!m_solidColorMaterial)
-            m_solidColorMaterial.reset(QQuickPathRenderMaterialFactory::createVertexColor(m_window));
+            m_solidColorMaterial.reset(QQuickPathMaterialFactory::createVertexColor(m_window));
         m_material = m_solidColorMaterial.data();
         break;
     case MatLinearGradient:
         if (!m_linearGradientMaterial)
-            m_linearGradientMaterial.reset(QQuickPathRenderMaterialFactory::createLinearGradient(m_window, this));
+            m_linearGradientMaterial.reset(QQuickPathMaterialFactory::createLinearGradient(m_window, this));
         m_material = m_linearGradientMaterial.data();
         break;
     default:
