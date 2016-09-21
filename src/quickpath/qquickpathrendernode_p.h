@@ -90,6 +90,19 @@ public:
 
     struct Color4ub { unsigned char r, g, b, a; };
 
+    struct GradientDesc {
+        QGradientStops stops;
+        QPointF start;
+        QPointF end;
+        bool operator==(const GradientDesc &other) const
+        {
+            return start == other.start && end == other.end && stops == other.stops;
+        }
+    };
+
+    bool isFillGradientActive() const { return m_fillGradientActive; }
+    const GradientDesc *fillGradient() const { return &m_fillGradient; }
+
 private:
     void triangulateFill();
     void triangulateStroke();
@@ -115,12 +128,16 @@ private:
     int m_renderDirty;
 
     bool m_fillGradientActive;
-    QGradientStops m_fillGradientStops;
-    QPointF m_fillGradientStart;
-    QPointF m_fillGradientEnd;
-
-    friend class QQuickPathLinearGradientShader;
+    GradientDesc m_fillGradient;
 };
+
+inline uint qHash(const QQuickPathRenderer::GradientDesc &v, uint seed = 0)
+{
+    uint h = seed;
+    for (int i = 0; i < 3 && i < v.stops.count(); ++i)
+        h += v.stops[i].second.rgba();
+    return h;
+}
 
 class QQuickPathRenderNode : public QSGGeometryNode
 {

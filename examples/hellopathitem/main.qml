@@ -281,11 +281,13 @@ Item {
             fillGradient: PathGradient {
                 x1: 0; y1: 0
                 x2: 80; y2: 0
+//                PathGradientStop { position: 0; color: "blue" }
+//                PathGradientStop { position: 0.2; color: "green" }
+//                PathGradientStop { position: 0.4; color: "red" }
+//                PathGradientStop { position: 0.6; color: "yellow" }
+//                PathGradientStop { position: 1; color: "cyan" }
                 PathGradientStop { position: 0; color: "blue" }
-                PathGradientStop { position: 0.2; color: "green" }
-                PathGradientStop { position: 0.4; color: "red" }
-                PathGradientStop { position: 0.6; color: "yellow" }
-                PathGradientStop { position: 1; color: "cyan" }
+                PathGradientStop { position: 1; color: "green" }
             }
             LineTo { x: 0; y: 80 }
             LineTo { x: 80; y: 80 }

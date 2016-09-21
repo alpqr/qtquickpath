@@ -50,10 +50,33 @@
 
 #include <QtQuickPath/qtquickpathglobal.h>
 #include <qsgmaterial.h>
+#include <QtGui/private/qopenglcontext_p.h>
+#include "qquickpathrendernode_p.h"
 
 QT_BEGIN_NAMESPACE
 
-class QQuickPathRenderNode;
+#ifndef QT_NO_OPENGL
+
+class QSGTexture;
+class QSGPlainTexture;
+
+class QQuickPathGradientCache : public QOpenGLSharedResource
+{
+public:
+    QQuickPathGradientCache(QOpenGLContext *context)
+        : QOpenGLSharedResource(context->shareGroup())
+    {
+    }
+    ~QQuickPathGradientCache();
+
+    void invalidateResource() override;
+    void freeResource(QOpenGLContext *) override;
+
+    QSGTexture *get(const QQuickPathRenderer::GradientDesc &grad);
+
+private:
+    QHash<QQuickPathRenderer::GradientDesc, QSGPlainTexture *> m_cache;
+};
 
 class QQuickPathLinearGradientShader : public QSGMaterialShader
 {
@@ -70,7 +93,8 @@ private:
     int m_opacityLoc;
     int m_matrixLoc;
     int m_viewportSizeLoc;
-    int m_gradVecLoc;
+    int m_gradStartLoc;
+    int m_gradEndLoc;
 };
 
 class QQuickPathLinearGradientMaterial : public QSGMaterial
@@ -99,6 +123,8 @@ public:
 private:
     QQuickPathRenderNode *m_node;
 };
+
+#endif // QT_NO_OPENGL
 
 QT_END_NAMESPACE
 
