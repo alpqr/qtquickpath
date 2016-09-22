@@ -74,7 +74,8 @@ void QQuickPathGradientStop::setColor(const QColor &color)
 }
 
 QQuickPathGradient::QQuickPathGradient(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      m_spread(PadSpread)
 {
 }
 
@@ -161,6 +162,20 @@ void QQuickPathGradient::setY2(qreal v)
     if (m_end.y() != v) {
         m_end.setY(v);
         emit y2Changed();
+        emit updated();
+    }
+}
+
+QQuickPathGradient::SpreadMode QQuickPathGradient::spread() const
+{
+    return m_spread;
+}
+
+void QQuickPathGradient::setSpread(SpreadMode mode)
+{
+    if (m_spread != mode) {
+        m_spread = mode;
+        emit spreadChanged();
         emit updated();
     }
 }

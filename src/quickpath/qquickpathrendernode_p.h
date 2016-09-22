@@ -94,9 +94,11 @@ public:
         QGradientStops stops;
         QPointF start;
         QPointF end;
+        QQuickPathGradient::SpreadMode spread;
         bool operator==(const GradientDesc &other) const
         {
-            return start == other.start && end == other.end && stops == other.stops;
+            return start == other.start && end == other.end && spread == other.spread
+                   && stops == other.stops;
         }
     };
 
@@ -134,6 +136,7 @@ private:
 inline uint qHash(const QQuickPathRenderer::GradientDesc &v, uint seed = 0)
 {
     uint h = seed;
+    h += v.start.x() + v.end.y() + v.spread;
     for (int i = 0; i < 3 && i < v.stops.count(); ++i)
         h += v.stops[i].second.rgba();
     return h;

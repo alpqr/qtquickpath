@@ -82,9 +82,16 @@ class QQUICKPATH_EXPORT QQuickPathGradient : public QObject
     Q_PROPERTY(qreal y1 READ y1 WRITE setY1 NOTIFY y1Changed)
     Q_PROPERTY(qreal x2 READ x2 WRITE setX2 NOTIFY x2Changed)
     Q_PROPERTY(qreal y2 READ y2 WRITE setY2 NOTIFY y2Changed)
+    Q_PROPERTY(SpreadMode spread READ spread WRITE setSpread NOTIFY spreadChanged)
     Q_CLASSINFO("DefaultProperty", "stops")
 
 public:
+    enum SpreadMode {
+        PadSpread,
+        RepeatSpread
+    };
+    Q_ENUM(SpreadMode)
+
     QQuickPathGradient(QObject *parent = nullptr);
 
     QQmlListProperty<QObject> stops();
@@ -100,12 +107,16 @@ public:
     qreal y2() const;
     void setY2(qreal v);
 
+    SpreadMode spread() const;
+    void setSpread(SpreadMode mode);
+
 signals:
     void updated();
     void x1Changed();
     void y1Changed();
     void x2Changed();
     void y2Changed();
+    void spreadChanged();
 
 private:
     static void appendStop(QQmlListProperty<QObject> *list, QObject *stop);
@@ -113,6 +124,7 @@ private:
     QVector<QObject *> m_stops;
     QPointF m_start;
     QPointF m_end;
+    SpreadMode m_spread;
 };
 
 QT_END_NAMESPACE

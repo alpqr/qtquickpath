@@ -144,8 +144,13 @@ QSGTexture *QQuickPathGradientCache::get(const QQuickPathRenderer::GradientDesc 
         f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, W, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
         tx = new QSGPlainTexture;
         tx->setTextureId(id);
-        tx->setHorizontalWrapMode(QSGTexture::Repeat);
-        tx->setVerticalWrapMode(QSGTexture::Repeat);
+        if (grad.spread == QQuickPathGradient::RepeatSpread) {
+            tx->setHorizontalWrapMode(QSGTexture::Repeat);
+            tx->setVerticalWrapMode(QSGTexture::Repeat);
+        } else {
+            tx->setHorizontalWrapMode(QSGTexture::ClampToEdge);
+            tx->setVerticalWrapMode(QSGTexture::ClampToEdge);
+        }
         m_cache[grad] = tx;
     }
     return tx;

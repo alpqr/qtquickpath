@@ -158,6 +158,7 @@ void QQuickPathRenderer::setFillColor(const QColor &color, QQuickPathGradient *g
         m_fillGradient.stops = gradient->sortedGradientStops();
         m_fillGradient.start = QPointF(gradient->x1(), gradient->y1());
         m_fillGradient.end = QPointF(gradient->x2(), gradient->y2());
+        m_fillGradient.spread = gradient->spread();
     }
     m_guiDirty |= DirtyColor;
 }
