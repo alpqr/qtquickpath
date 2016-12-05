@@ -1,4 +1,10 @@
 
+Note: as of 12/2016 this repository is not actively maintained.
+Development is on-going in the wip/scenegraph branch of qtdeclarative:
+https://codereview.qt-project.org/#/q/status:open+project:qt/qtdeclarative+branch:wip/scenegraphng,n,z
+
+*****
+
 This is the experimental Qt Quick Path item.
 
 The end goal is to productize something similar to
